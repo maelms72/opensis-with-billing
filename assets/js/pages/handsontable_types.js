@@ -141,7 +141,6 @@ $(function() {
     // Initialize with options
     var hot_select_init = new Handsontable(hot_select, {
         data: car_data,
-        colHeaders: true,
         stretchH: 'all',
         colHeaders: ['Car', 'Year', 'Price ($)', 'Market share'],
         columns: [
