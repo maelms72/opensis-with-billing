@@ -143,7 +143,7 @@ $(function () {
                 .attr("height", height);
 
         // Add line
-        var path = svg.selectAll('.d3-line')
+        svg.selectAll('.d3-line')
             .data(data)
             .enter()
             .append("path")
