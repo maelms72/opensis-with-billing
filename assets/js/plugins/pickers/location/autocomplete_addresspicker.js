@@ -21,7 +21,6 @@
         componentsFilter:'',
         updateCallback: null,
         reverseGeocode: false,
-        autocomplete: 'default',
         language: '',
         mapOptions: {
             zoom: 5,
@@ -45,7 +44,7 @@
             type: false
 
         },
-        autocomplete: '' // could be autocomplete: "bootstrap" to use bootstrap typeahead autocomplete instead of jQueryUI
+        autocomplete: 'default' // could be autocomplete: "bootstrap" to use bootstrap typeahead autocomplete instead of jQueryUI
     },
 
     marker: function() {
