@@ -74,7 +74,7 @@ $(function() {
     var hot_search_basic_input = document.getElementById('hot_search_basic_input');
 
     // Setup matching function
-    function onlyExactMatch(queryStr, value) {
+    function onlyExactMatchBasic(queryStr, value) {
         return queryStr.toString() === value.toString();
     }
 
