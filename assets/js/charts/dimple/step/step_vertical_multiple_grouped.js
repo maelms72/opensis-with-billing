@@ -52,12 +52,12 @@ $(function () {
         // ------------------------------
 
         // Add line
-        var s = myChart
-            .addSeries(["Brand"], dimple.plot.line)
-            .interpolation = "step";
+        var s = myChart.addSeries(["Brand"], dimple.plot.line);
+        s.interpolation = "step";
 
         // Line space
         s.barGap = 0.05;
+
 
 
         // Add legend
