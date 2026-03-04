@@ -53,8 +53,8 @@ $(function () {
 
         // Add line
         var s = myChart
-            .addSeries(["Brand"], dimple.plot.line)
-            .interpolation = "basis";
+            .addSeries(["Brand"], dimple.plot.line);
+        s.interpolation = "basis";
 
         // Line space
         s.barGap = 0.05;

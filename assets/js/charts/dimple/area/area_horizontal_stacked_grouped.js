@@ -52,9 +52,8 @@ $(function () {
         // ------------------------------
 
         // Add area
-        var s = myChart
-            .addSeries("SKU", dimple.plot.area)
-            .interpolation = "basis";
+        var s = myChart.addSeries("SKU", dimple.plot.area);
+        s.interpolation = "basis";
 
         // Line weight
         s.lineWeight = 1;
