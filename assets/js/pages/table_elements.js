@@ -139,7 +139,6 @@ $(function() {
     // Composite
     $('.spark-comoposite').sparkline('html', {
         type: 'bar',
-        barColor: '#aaf',
         barWidth: 6,
         height: 22,
         barColor: '#009AD6'
