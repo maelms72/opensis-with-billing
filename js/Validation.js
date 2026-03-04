@@ -382,27 +382,59 @@ function ValidateDate_Portal_Notes() {
     if (elem[i].name == "year_values[new][END_DATE]") {
       ey = elem[i];
     }
+
+    // Grade posting start date elements
+    if (elem[i].name == "month_values[new][POST_START_DATE]") {
+      psm = elem[i];
+    }
+
+    if (elem[i].name == "day_values[new][POST_START_DATE]") {
+      psd = elem[i];
+    }
+
+    if (elem[i].name == "year_values[new][POST_START_DATE]") {
+      psy = elem[i];
+    }
+
+    // Grade posting end date elements
+    if (elem[i].name == "month_values[new][POST_END_DATE]") {
+      pem = elem[i];
+    }
+
+    if (elem[i].name == "day_values[new][POST_END_DATE]") {
+      ped = elem[i];
+    }
+
+    if (elem[i].name == "year_values[new][POST_END_DATE]") {
+      pey = elem[i];
+    }
   }
 
   try {
     if (false == CheckDate(sm, sd, sy, em, ed, ey)) {
-      em.focus();
+      if (em && typeof em.focus === "function") {
+        em.focus();
+      }
       return false;
     }
   } catch (err) {}
 
   try {
-    if (false == isDate(psm, psd, psy)) {
+    if (psm && psd && psy && false == isDate(psm, psd, psy)) {
       alert("Please enter the grade posting start date");
-      psm.focus();
+      if (typeof psm.focus === "function") {
+        psm.focus();
+      }
       return false;
     }
   } catch (err) {}
 
   try {
-    if (true == isDate(pem, ped, pey)) {
-      if (false == CheckDate(psm, psd, psy, pem, ped, pey)) {
-        pem.focus();
+    if (pem && ped && pey && true == isDate(pem, ped, pey)) {
+      if (psm && psd && psy && false == CheckDate(psm, psd, psy, pem, ped, pey)) {
+        if (pem && typeof pem.focus === "function") {
+          pem.focus();
+        }
         return false;
       }
     }
