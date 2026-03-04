@@ -24,7 +24,7 @@ $(function() {
 		}
 
 		// Apply options
-		var map = new google.maps.Map($('.map-adding-controls')[0], mapOptions);
+		new google.maps.Map($('.map-adding-controls')[0], mapOptions);
 	}
 
 	// Load map
