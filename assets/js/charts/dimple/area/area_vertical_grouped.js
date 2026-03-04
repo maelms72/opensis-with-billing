@@ -53,8 +53,8 @@ $(function () {
 
         // Add area
         var s = myChart
-            .addSeries("Owner", dimple.plot.area)
-            .interpolation = "basis";
+            .addSeries("Owner", dimple.plot.area);
+        s.interpolation = "basis";
 
         // Line weight
         s.lineWeight = 1;
