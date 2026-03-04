@@ -73,11 +73,6 @@ $(function() {
     // Define search field
     var hot_search_basic_input = document.getElementById('hot_search_basic_input');
 
-    // Setup matching function
-    function onlyExactMatch(queryStr, value) {
-        return queryStr.toString() === value.toString();
-    }
-
     // Add event
     Handsontable.Dom.addEvent(hot_search_basic_input, 'keyup', function (event) {
         var queryResult = hot_search_basic_init.search.query(this.value);
