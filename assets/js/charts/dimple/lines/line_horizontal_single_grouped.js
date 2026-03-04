@@ -52,12 +52,12 @@ $(function () {
         // ------------------------------
 
         // Add line
-        var s = myChart
-            .addSeries("Owner", dimple.plot.line)
-            .interpolation = "basis";
+        var s = myChart.addSeries("Owner", dimple.plot.line);
+        s.interpolation = "basis";
 
         // Bar space
         s.barGap = 0.05;
+
 
 
         // Add styles
