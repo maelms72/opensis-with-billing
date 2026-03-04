@@ -600,7 +600,8 @@ function formcheck_periods_attendance_F2(option, attendance, i_value)
             document.getElementById('get_status').value = 'false';
         } else
             err[err.length] = '';
-        if (err != '') {
+        var obj = document.getElementById('ajax_output');
+        if (err != '' && obj) {
             obj.style.color = '#ff0000';
             obj.innerHTML = err.join('<br />');
             return;
