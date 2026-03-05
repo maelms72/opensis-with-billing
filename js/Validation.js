@@ -3437,9 +3437,12 @@ function ValidateTime_eligibility_entrytimes() {
     }
   } catch (err) {}
   try {
-    if (true == isDate(pem, ped, pey)) {
+    // Perform date validation only if all required date fields are available.
+    if (psm && psd && psy && pem && ped && pey && true == isDate(pem, ped, pey)) {
       if (false == CheckDate(psm, psd, psy, pem, ped, pey)) {
-        pem.focus();
+        if (pem && typeof pem.focus === "function") {
+          pem.focus();
+        }
         return false;
       }
     }
