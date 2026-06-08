@@ -58,12 +58,21 @@ if (isset($_REQUEST['modfunc']) && $_REQUEST['modfunc'] == 'trash') {
     }
 }
 if (isset($_REQUEST['modfunc']) && $_REQUEST['modfunc'] == 'body') {
+    if (User('PROFILE') == 'student')
+    $user_id = UserStudentID();
+    else
+    $user_id = UserID();
+
+    $userName = User('USERNAME');
     //PopTable('header', _messageDetails);
     echo '<div class="panel panel-default">';
     echo '<div class="panel-body">';
 
-    $mail_id = $_REQUEST['mail_id'];
-    $mail_body = "select mail_body,mail_Subject,to_user,to_cc,to_bcc,mail_datetime,from_user,mail_attachment,to_grpName from msg_outbox where mail_id='$mail_id'";
+    // $mail_id = $_REQUEST['mail_id'];
+    // $mail_body = "select mail_body,mail_Subject,to_user,to_cc,to_bcc,mail_datetime,from_user,mail_attachment,to_grpName from msg_outbox where mail_id='$mail_id'";
+    // $mail_body_info = DBGet(DBQuery($mail_body));
+    $mail_id = sqlSecurityFilter($_REQUEST['mail_id']);
+    $mail_body = "select mail_body,mail_Subject,to_user,to_cc,to_bcc,mail_datetime,from_user,mail_attachment,to_grpName from msg_outbox  JOIN login_authentication lg ON msg_outbox.from_user = lg.username where msg_outbox.mail_id=$mail_id AND from_user='$userName' AND lg.user_id = " . $user_id . " AND lg.profile_id = " .User('PROFILE_ID') . " AND istrash is NULL order by($mail_id) desc";
     $mail_body_info = DBGet(DBQuery($mail_body));
 
     foreach ($mail_body_info as $k => $v) {
