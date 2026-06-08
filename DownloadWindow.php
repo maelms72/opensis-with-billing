@@ -31,6 +31,10 @@ include 'Warehouse.php';
 include 'Data.php';
 
 // Prevent Directory Traversal by sanitizing filename parameters
+ if (User('PROFILE') == 'student')
+    $user_id = UserStudentID();
+    else
+    $user_id = UserID();
 function sanitize_filename($filename) {
     // Fully decode URL encoding to handle double/triple encoding attacks (e.g., %252e%252e%252f)
     // Loop until no more decoding occurs
@@ -66,10 +70,20 @@ if (isset($_REQUEST['down_id']))
 
 if(isset($_REQUEST['down_id']) && $_REQUEST['down_id']!='')
 {
-    if (isset($_REQUEST['down_id']) && $_REQUEST['down_id'] != '')
-        $downfile_info = DBGet(DBQuery('SELECT * FROM user_file_upload WHERE download_id=\'' . $_REQUEST['down_id'] . '\''));
-    else
-        $downfile_info = DBGet(DBQuery('SELECT * FROM user_file_upload WHERE id=\'' . $_REQUEST['down_id'] . '\''));
+    if (isset($_REQUEST['down_id']) && $_REQUEST['down_id'] != ''){
+        $downfile_info = 'SELECT * FROM user_file_upload WHERE download_id=\'' . $_REQUEST['down_id'] . '\'';
+    if(User('PROFILE')!='admin'){
+        $downfile_info .= ' AND user_id='.$user_id.'';
+    }
+    $downfile_info = DBGet(DBQuery($downfile_info));
+    }
+    else{
+        $downfile_info = 'SELECT * FROM user_file_upload WHERE id=\'' . $_REQUEST['down_id'] . '\'';
+        if(User('PROFILE')!='admin'){
+        $downfile_info .= ' AND user_id='.$user_id.'';
+    }
+    $downfile_info = DBGet(DBQuery($downfile_info));
+    }
     header("Cache-Control: public");
     header("Pragma: ");
     header("Expires: 0"); 
