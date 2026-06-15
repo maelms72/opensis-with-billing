@@ -64,6 +64,11 @@ if ($app_rows === 0) {
     // parses it as MMDDYYYYREV (month=0-1, day=2-3, year=4-7). Fix it so the
     // computed date falls after the 05/28/2009 cutoff and no upgrade redirect fires.
     $m->query("UPDATE `app` SET `value`='02062026001' WHERE `name`='build'");
+    // system_preference_misc is never seeded by any installer file but must
+    // have exactly one row — openSIS reads it on every page for maintenance
+    // mode, failed-login limits, and activity-day checks.
+    $m->query("INSERT IGNORE INTO `system_preference_misc`
+        (fail_count, activity_days, system_maintenance_switch) VALUES (3, 30, NULL)");
     echo "  ✓ Initial data seeded\n";
 } else {
     echo "  ✓ Seed data already present\n";
