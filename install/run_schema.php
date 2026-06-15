@@ -55,6 +55,11 @@ function run_multi(mysqli $m, string $path): void {
     $sql = file_get_contents($path);
     if ($sql === false) { echo "ERROR: Cannot read $path\n"; exit(1); }
 
+    // MySQL requires "-- " (space after dashes) for line comments.
+    // The openSIS schema has "--SET ..." (no space) which MySQL rejects.
+    // Strip any line where "--" is immediately followed by a non-space character.
+    $sql = preg_replace('/^--\S[^\n]*$/m', '', $sql);
+
     if (!$m->multi_query($sql)) {
         echo "ERROR in " . basename($path) . ": " . $m->error . "\n";
         exit(1);
