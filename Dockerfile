@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libxml2-dev \
     libonig-dev \
-    default-mysql-client \
     unzip \
     curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -51,7 +50,7 @@ RUN chown -R www-data:www-data /var/www/html \
     && find /var/www/html -type f -exec chmod 644 {} \;
 
 # Make writable dirs writable (openSIS writes to these)
-RUN chmod -R 775 /var/www/html/assets \
+RUN chmod -R 775 /var/www/html/assets 2>/dev/null || true \
     && chmod -R 775 /var/www/html/lang 2>/dev/null || true
 
 # Copy and set up entrypoint
