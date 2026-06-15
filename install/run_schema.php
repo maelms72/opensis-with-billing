@@ -41,7 +41,8 @@ if ($has_core === 0) {
 // Seed required data if app table is empty.
 // SqlForClientSchoolInc.php assigns all seed SQL to $text — include it and run it.
 // This is normally executed by the interactive PHP installer which we bypass.
-$app_rows = (int) $m->query("SELECT COUNT(*) AS c FROM `app`")->fetch_assoc()['c'];
+// Use user_profiles as sentinel — app may be manually populated but user data absent.
+$app_rows = (int) $m->query("SELECT COUNT(*) AS c FROM `user_profiles`")->fetch_assoc()['c'];
 if ($app_rows === 0) {
     echo "  Seeding initial data...\n";
     chdir("$app/install");
