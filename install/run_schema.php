@@ -62,25 +62,38 @@ function run_multi(mysqli $m, string $path): void {
     // Strip --WORD comments (no space after --) that MySQL rejects as syntax errors.
     $sql = preg_replace('/^--\S[^\n]*$/m', '', $sql);
 
-    // Strip /* ... */ block comments before splitting on semicolons.
-    // Block comments can contain semicolons which would otherwise produce
-    // invalid SQL fragments when the file is split on ';'.
-    // Use the 's' flag so '.' matches newlines (handles multi-line blocks).
+    // Strip /* ... */ block comments (may contain semicolons that would
+    // produce invalid fragments when splitting on ';').
     $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
 
-    // Split and run one statement at a time so a 1050 (table already exists)
-    // on one statement doesn't abort the rest of the file.
-    // PHP 8.2 throws mysqli_sql_exception on query errors, so use try/catch
-    // rather than return-value checks — otherwise the 1050 skip never runs.
-    $stmts = array_filter(array_map('trim', explode(';', $sql)));
-    foreach ($stmts as $stmt) {
-        if ($stmt === '') continue;
-        try {
-            $m->query($stmt);
-        } catch (\mysqli_sql_exception $e) {
-            if ($e->getCode() === 1050) continue; // table already exists — safe to skip
-            echo "ERROR in " . basename($path) . " (errno {$e->getCode()}): " . $e->getMessage() . "\n";
-            exit(1);
+    // Extract and separately execute DELIMITER $$ blocks (client-only command
+    // that mysqli::query() cannot handle). Split the file on DELIMITER directives,
+    // execute plain sections on ';', and $$ sections statement-by-statement.
+    $segments = preg_split('/^DELIMITER\s+(\S+)\s*$/mi', $sql, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $delimiter = ';';
+    foreach ($segments as $segment) {
+        $segment = trim($segment);
+        if ($segment === '') continue;
+        // A captured delimiter token — switch the active delimiter and skip.
+        if (preg_match('/^\S+$/', $segment) && strlen($segment) <= 10 && !str_contains($segment, ' ')) {
+            $delimiter = $segment;
+            continue;
+        }
+        if ($delimiter === ';') {
+            $stmts = array_filter(array_map('trim', explode(';', $segment)));
+        } else {
+            // $$ or other non-semicolon delimiter: split on it, each piece is a full statement.
+            $stmts = array_filter(array_map('trim', explode($delimiter, $segment)));
+        }
+        foreach ($stmts as $stmt) {
+            if ($stmt === '') continue;
+            try {
+                $m->query($stmt);
+            } catch (\mysqli_sql_exception $e) {
+                if ($e->getCode() === 1050) continue; // table already exists — safe to skip
+                echo "ERROR in " . basename($path) . " (errno {$e->getCode()}): " . $e->getMessage() . "\n";
+                exit(1);
+            }
         }
     }
 }
