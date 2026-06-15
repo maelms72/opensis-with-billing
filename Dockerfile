@@ -23,8 +23,9 @@ RUN apt-get update && apt-get install -y \
         opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Disable mpm_event; enable mpm_prefork (required for mod_php)
-RUN a2dismod mpm_event && a2enmod mpm_prefork
+# Force-remove ALL MPM modules, then enable only mpm_prefork (required for mod_php)
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf \
+    && a2enmod mpm_prefork
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
