@@ -8,7 +8,7 @@
 
 set -e
 
-APP_DIR="/var/www/html"
+export APP_DIR="/var/www/html"
 
 echo "▶ Starting openSIS entrypoint..."
 
@@ -107,7 +107,7 @@ if ((int)\$row['c'] === 0) {
     echo \"  ✓ Billing schema already present — skipping\n\";
 }
 \$m->close();
-" APP_DIR="$APP_DIR" || exit 1
+" || exit 1
 
 # ── 6. Configure Apache to use Railway's $PORT ────────────────────────────────
 APACHE_PORT="${PORT:-80}"
