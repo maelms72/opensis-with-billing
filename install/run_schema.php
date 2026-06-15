@@ -17,16 +17,17 @@ if ($m->connect_errno) {
     exit(1);
 }
 
-// api_info is the first table created by the schema; its presence means
-// the schema has been run (fully or partially). On a truly fresh DB it won't
-// exist. Error 1050 (table already exists) is suppressed in the drain loop
-// so a partial install can be completed safely on re-run.
-$res = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables
-    WHERE table_schema='$name' AND table_name='api_info'");
-$has_core = (int) $res->fetch_assoc()['c'];
+// Complete install = both api_info (first table) and login_authentication (late table) exist.
+// If api_info exists but login_authentication doesn't, the schema is partial —
+// re-run it; per-statement 1050 suppression handles already-existing tables safely.
+$has_api   = (int) $m->query("SELECT COUNT(*) AS c FROM information_schema.tables
+    WHERE table_schema='$name' AND table_name='api_info'")->fetch_assoc()['c'];
+$has_login = (int) $m->query("SELECT COUNT(*) AS c FROM information_schema.tables
+    WHERE table_schema='$name' AND table_name='login_authentication'")->fetch_assoc()['c'];
+$has_core  = ($has_api && $has_login) ? 1 : 0;
 
 if ($has_core === 0) {
-    echo "  Core schema missing — installing...\n";
+    echo "  Core schema " . ($has_api ? "partial" : "missing") . " — installing...\n";
     run_multi($m, "$app/install/OpensisSchemaMysqlInc.sql");
     echo "  ✓ Core schema done\n";
     run_delimited($m, "$app/install/OpensisProcsMysqlInc.sql");
@@ -58,21 +59,20 @@ function run_multi(mysqli $m, string $path): void {
     $sql = file_get_contents($path);
     if ($sql === false) { echo "ERROR: Cannot read $path\n"; exit(1); }
 
-    // MySQL requires "-- " (space after dashes) for line comments.
-    // The openSIS schema has "--SET ..." (no space) which MySQL rejects.
-    // Strip any line where "--" is immediately followed by a non-space character.
+    // Strip --WORD comments (no space after --) that MySQL rejects as syntax errors.
     $sql = preg_replace('/^--\S[^\n]*$/m', '', $sql);
 
-    if (!$m->multi_query($sql)) {
-        echo "ERROR in " . basename($path) . ": " . $m->error . "\n";
-        exit(1);
+    // Split and run one statement at a time so a 1050 (table already exists)
+    // on one statement doesn't abort the rest of the file.
+    $stmts = array_filter(array_map('trim', explode(';', $sql)));
+    foreach ($stmts as $stmt) {
+        if ($stmt === '') continue;
+        if (!$m->query($stmt)) {
+            if ($m->errno === 1050) continue; // table already exists — safe to skip
+            echo "ERROR in " . basename($path) . " (errno {$m->errno}): " . $m->error . "\n";
+            exit(1);
+        }
     }
-    // Drain all result sets; suppress 1050 (table already exists) so a
-    // partial install can be completed without crashing on pre-existing tables.
-    do {
-        if ($r = $m->store_result()) $r->free();
-        if ($m->errno === 1050) continue;
-    } while ($m->more_results() && $m->next_result());
 }
 
 function run_delimited(mysqli $m, string $path): void {
