@@ -48,11 +48,15 @@ if ($app_rows === 0) {
     chdir("$app/install");
     // SqlForClientSchoolInc.php reads DB credentials from $_SESSION at line 218.
     // There is no web session in the CLI entrypoint, so populate it manually.
-    $_SESSION['server']   = getenv('DB_HOST');
-    $_SESSION['port']     = getenv('DB_PORT');
-    $_SESSION['db']       = getenv('DB_NAME');
-    $_SESSION['username'] = getenv('DB_USER');
-    $_SESSION['password'] = getenv('DB_PASS');
+    $_SESSION['server']              = getenv('DB_HOST');
+    $_SESSION['port']                = getenv('DB_PORT');
+    $_SESSION['db']                  = getenv('DB_NAME');
+    $_SESSION['username']            = getenv('DB_USER');
+    $_SESSION['password']            = getenv('DB_PASS');
+    $_SESSION['syear']               = date('Y');
+    $_SESSION['sname']               = 'Default School';
+    $_SESSION['user_school_beg_date'] = date('Y') . '-08-01';
+    $_SESSION['user_school_end_date'] = (date('Y') + 1) . '-06-30';
     $text = '';
     require "$app/install/SqlForClientSchoolInc.php";
     run_multi_str($m, $text);
