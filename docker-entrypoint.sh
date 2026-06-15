@@ -55,35 +55,59 @@ define('DB_PASS', '${DB_PASS}');
 EOF
 echo "  ✓ DatabaseInc.php written"
 
-# ── 4. Wait for MySQL to be ready ─────────────────────────────────────────────
+# ── 4. Wait for MySQL to be ready (PHP/mysqli — works with MySQL 9.x caching_sha2_password) ──
 echo "▶ Waiting for MySQL at ${DB_HOST}:${DB_PORT}..."
-MAX_TRIES=60
-COUNT=0
-until mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" -e "SELECT 1;" "$DB_NAME" >/dev/null 2>&1; do
-  COUNT=$((COUNT + 1))
-  if [ $COUNT -ge $MAX_TRIES ]; then
-    echo "ERROR: Could not connect to MySQL after ${MAX_TRIES} attempts. Check DB_* variables."
-    exit 1
-  fi
-  echo "  Attempt $COUNT/$MAX_TRIES — waiting 3s..."
-  sleep 3
-done
-echo "  ✓ MySQL is ready"
+php -r "
+\$host = getenv('DB_HOST');
+\$port = (int) getenv('DB_PORT');
+\$user = getenv('DB_USER');
+\$pass = getenv('DB_PASS');
+\$name = getenv('DB_NAME');
+\$max  = 60;
+for (\$i = 1; \$i <= \$max; \$i++) {
+    \$m = @new mysqli(\$host, \$user, \$pass, \$name, \$port);
+    if (\$m->connect_errno === 0) {
+        \$m->close();
+        echo \"  ✓ MySQL is ready (attempt \$i)\n\";
+        exit(0);
+    }
+    echo \"  Attempt \$i/\$max — \" . \$m->connect_error . \" — waiting 3s...\n\";
+    sleep(3);
+}
+echo \"ERROR: Could not connect to MySQL after \$max attempts.\n\";
+exit(1);
+" || exit 1
 
-# ── 5. Run billing schema if not already installed ────────────────────────────
+# ── 5. Run billing schema if not already installed (PHP/mysqli) ───────────────
 echo "▶ Checking billing schema..."
-TABLE_EXISTS=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" \
-  -se "SELECT COUNT(*) FROM information_schema.tables
-       WHERE table_schema='${DB_NAME}' AND table_name='billing_fee_types';" 2>/dev/null || echo "0")
+php -r "
+\$host   = getenv('DB_HOST');
+\$port   = (int) getenv('DB_PORT');
+\$user   = getenv('DB_USER');
+\$pass   = getenv('DB_PASS');
+\$name   = getenv('DB_NAME');
+\$schema = getenv('APP_DIR') . '/install/billing_schema.sql';
 
-if [ "$TABLE_EXISTS" = "0" ]; then
-  echo "  Running billing_schema.sql..."
-  mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" \
-    < "$APP_DIR/install/billing_schema.sql"
-  echo "  ✓ Billing schema installed"
-else
-  echo "  ✓ Billing schema already present — skipping"
-fi
+\$m = new mysqli(\$host, \$user, \$pass, \$name, \$port);
+if (\$m->connect_errno) { echo 'ERROR: ' . \$m->connect_error . \"\n\"; exit(1); }
+
+\$row = \$m->query(\"SELECT COUNT(*) AS c FROM information_schema.tables
+    WHERE table_schema='\$name' AND table_name='billing_fee_types'\")
+    ->fetch_assoc();
+
+if ((int)\$row['c'] === 0) {
+    echo \"  Running billing_schema.sql...\n\";
+    \$sql = file_get_contents(\$schema);
+    if (!\$sql) { echo \"ERROR: Cannot read \$schema\n\"; exit(1); }
+    foreach (array_filter(array_map('trim', explode(';', \$sql))) as \$stmt) {
+        if (!\$m->query(\$stmt)) { echo 'ERROR: ' . \$m->error . \"\n\"; exit(1); }
+    }
+    echo \"  ✓ Billing schema installed\n\";
+} else {
+    echo \"  ✓ Billing schema already present — skipping\n\";
+}
+\$m->close();
+" APP_DIR="$APP_DIR" || exit 1
 
 # ── 6. Configure Apache to use Railway's $PORT ────────────────────────────────
 APACHE_PORT="${PORT:-80}"
