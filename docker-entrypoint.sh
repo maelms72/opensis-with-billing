@@ -81,66 +81,67 @@ exit(1);
 # ── 5. Install openSIS core schema + billing schema if not already present ────
 echo "▶ Checking database schemas..."
 php -r "
-function run_sql_file(\$m, \$path) {
+function run_plain(\$m, \$path) {
+    // Use multi_query — handles large multi-statement SQL files reliably
     \$sql = file_get_contents(\$path);
     if (\$sql === false) { echo \"ERROR: Cannot read \$path\n\"; exit(1); }
-    // Detect DELIMITER \$\$ pattern (used in procs/triggers)
-    if (strpos(\$sql, 'DELIMITER') !== false) {
-        // Split on \$\$ delimiter, strip DELIMITER lines, run each block
-        \$blocks = preg_split('/DELIMITER\s+\\\$\\\$\s*/i', \$sql);
-        foreach (\$blocks as \$block) {
-            foreach (array_filter(array_map('trim', explode('\$\$', \$block))) as \$stmt) {
-                \$stmt = trim(preg_replace('/DELIMITER\s+;.*$/mi', '', \$stmt));
-                if (\$stmt === '' || preg_match('/^(--|#)/', \$stmt)) continue;
-                if (!\$m->query(\$stmt)) { echo 'ERROR in ' . basename(\$path) . ': ' . \$m->error . \"\n\"; exit(1); }
-            }
-        }
-    } else {
-        // Plain semicolon-delimited SQL
-        foreach (array_filter(array_map('trim', explode(';', \$sql))) as \$stmt) {
-            if (preg_match('/^(--|#)/i', \$stmt)) continue;
-            if (!\$m->query(\$stmt)) { echo 'ERROR in ' . basename(\$path) . ': ' . \$m->error . \"\n\"; exit(1); }
+    if (!\$m->multi_query(\$sql)) {
+        echo 'ERROR in ' . basename(\$path) . ': ' . \$m->error . \"\n\"; exit(1);
+    }
+    // Flush all result sets so the connection is ready for the next query
+    do { if (\$r = \$m->store_result()) \$r->free(); } while (\$m->next_result());
+}
+
+function run_delimited(\$m, \$path) {
+    // For files using DELIMITER \$\$: split on \$\$, execute each block individually
+    \$sql = file_get_contents(\$path);
+    if (\$sql === false) { echo \"ERROR: Cannot read \$path\n\"; exit(1); }
+    // Remove DELIMITER directives, split on \$\$
+    \$sql = preg_replace('/^DELIMITER.*\$/mi', '', \$sql);
+    foreach (array_filter(array_map('trim', explode('\$\$', \$sql))) as \$stmt) {
+        if (\$stmt === '') continue;
+        if (!\$m->query(\$stmt)) {
+            echo 'ERROR in ' . basename(\$path) . ': ' . \$m->error . \"\n\"; exit(1);
         }
     }
 }
 
-\$host   = getenv('DB_HOST');
-\$port   = (int) getenv('DB_PORT');
-\$user   = getenv('DB_USER');
-\$pass   = getenv('DB_PASS');
-\$name   = getenv('DB_NAME');
-\$app    = getenv('APP_DIR');
+\$host = getenv('DB_HOST');
+\$port = (int) getenv('DB_PORT');
+\$user = getenv('DB_USER');
+\$pass = getenv('DB_PASS');
+\$name = getenv('DB_NAME');
+\$app  = getenv('APP_DIR');
 
 \$m = new mysqli(\$host, \$user, \$pass, \$name, \$port);
 if (\$m->connect_errno) { echo 'ERROR: ' . \$m->connect_error . \"\n\"; exit(1); }
 
-// Check if core openSIS schema exists (app table is created by the installer)
-\$row = \$m->query(\"SELECT COUNT(*) AS c FROM information_schema.tables
-    WHERE table_schema='\$name' AND table_name='app'\")->fetch_assoc();
+// Sentinel: login_authentication must exist AND app must have rows for a complete install
+\$has_login = (int)\$m->query(\"SELECT COUNT(*) AS c FROM information_schema.tables
+    WHERE table_schema='\$name' AND table_name='login_authentication'\")->fetch_assoc()['c'];
+\$has_app_rows = (int)\$m->query(\"SELECT COUNT(*) AS c FROM app 2>/dev/null\")->fetch_assoc()['c'] ?? 0;
 
-if ((int)\$row['c'] === 0) {
-    echo \"  Core schema not found — running OpensisSchemaMysqlInc.sql...\n\";
-    run_sql_file(\$m, \"\$app/install/OpensisSchemaMysqlInc.sql\");
-    echo \"  ✓ Core schema installed\n\";
-    // Seed stored procedures and triggers
-    foreach (['OpensisProcsMysqlInc.sql', 'OpensisTriggerMysqlInc.sql'] as \$f) {
-        \$path = \"\$app/install/\$f\";
-        if (file_exists(\$path)) { run_sql_file(\$m, \$path); echo \"  ✓ \$f done\n\"; }
-    }
+if (\$has_login === 0) {
+    echo \"  Core schema incomplete — installing...\n\";
+    run_plain(\$m, \"\$app/install/OpensisSchemaMysqlInc.sql\");
+    echo \"  ✓ Core schema done\n\";
+    run_delimited(\$m, \"\$app/install/OpensisProcsMysqlInc.sql\");
+    echo \"  ✓ Procs done\n\";
+    run_delimited(\$m, \"\$app/install/OpensisTriggerMysqlInc.sql\");
+    echo \"  ✓ Triggers done\n\";
 } else {
-    echo \"  ✓ Core schema already present — skipping\n\";
+    echo \"  ✓ Core schema already present\n\";
 }
 
-// Check billing schema
-\$row = \$m->query(\"SELECT COUNT(*) AS c FROM information_schema.tables
-    WHERE table_schema='\$name' AND table_name='billing_fee_types'\")->fetch_assoc();
+\$has_billing = (int)\$m->query(\"SELECT COUNT(*) AS c FROM information_schema.tables
+    WHERE table_schema='\$name' AND table_name='billing_fee_types'\")->fetch_assoc()['c'];
 
-if ((int)\$row['c'] === 0) {
-    echo \"  Running billing_schema.sql...\n\";
-    run_sql_file(\$m, \"\$app/install/billing_schema.sql\");
-    echo \"  ✓ Billing schema installed\n\";
+if (\$has_billing === 0) {
+    echo \"  Installing billing schema...\n\";
+    run_plain(\$m, \"\$app/install/billing_schema.sql\");
+    echo \"  ✓ Billing schema done\n\";
 } else {
-    echo \"  ✓ Billing schema already present — skipping\n\";
+    echo \"  ✓ Billing schema already present\n\";
 }
 \$m->close();
 " || exit 1
