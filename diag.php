@@ -46,5 +46,11 @@ if (strlen($out) > 0) {
     echo "No output produced.\n";
 }
 
+// Reset admin password to a known value
+$newpass = 'Admin1234!';
+$newhash = password_hash($newpass, PASSWORD_DEFAULT);
+$m->query("UPDATE login_authentication SET password='$newhash' WHERE username='os4ed'");
+echo "\nAdmin password reset to: $newpass (username: os4ed)\n";
+
 $m->close();
 echo "\n</pre>\n";
