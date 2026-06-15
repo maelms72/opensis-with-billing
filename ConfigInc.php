@@ -68,6 +68,7 @@ if (!defined('CONFIG_INC')) {
         'scheduling' => true,
         'grades' => true,
         'attendance' => true,
+        'billing' => true,
         'eligibility' => true,
         'Discipline' => true,
         'Billing' => true,
