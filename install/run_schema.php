@@ -62,6 +62,14 @@ if ($app_rows === 0) {
     $text = '';
     require "$app/install/SqlForClientSchoolInc.php";
     run_multi_str($m, $text);
+    // The profile_exceptions INSERT in SqlForClientSchoolInc.php uses plain INSERT,
+    // so a duplicate row (SchoolwideScheduleReport appears twice) aborts the whole
+    // statement before any rows are committed. Re-run it with IGNORE so all module
+    // permissions are seeded even if a few duplicates exist.
+    $seed_src = file_get_contents("$app/install/SqlForClientSchoolInc.php");
+    if (preg_match("/INSERT INTO `profile_exceptions`[^;]+;/s", $seed_src, $pe_m)) {
+        $m->query(str_replace('INSERT INTO', 'INSERT IGNORE INTO', $pe_m[0]));
+    }
     // SqlForClientSchoolInc.php stores build as YYYYMMDDREV but UpgradeInc.php
     // parses it as MMDDYYYYREV (month=0-1, day=2-3, year=4-7). Fix it so the
     // computed date falls after the 05/28/2009 cutoff and no upgrade redirect fires.

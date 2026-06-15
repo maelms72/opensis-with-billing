@@ -57,6 +57,22 @@ $jr = $m->query("SELECT PROFILE,STAFF_ID,CURRENT_SCHOOL_ID,FIRST_NAME,LAST_NAME,
 $jr_row = $jr ? $jr->fetch_assoc() : null;
 echo "login_RET query: " . ($jr_row ? "OK syear={$jr_row['SYEAR']} name={$jr_row['FIRST_NAME']} {$jr_row['LAST_NAME']}" : "NO ROWS (login will fail)") . "\n";
 
+// Check and fix profile_exceptions — needed for the navigation menu
+$pe_count = $m->query("SELECT COUNT(*) AS c FROM profile_exceptions WHERE profile_id=0")->fetch_assoc()['c'];
+echo "\nprofile_exceptions (profile_id=0): $pe_count rows\n";
+if ((int)$pe_count < 10) {
+    echo "Too few — inserting full permission set...\n";
+    $pe_sql = file_get_contents('/var/www/html/install/SqlForClientSchoolInc.php');
+    // Extract just the big profile_exceptions INSERT from $text
+    if (preg_match("/INSERT INTO `profile_exceptions`[^;]+;/s", $pe_sql, $m2)) {
+        $insert = str_replace('INSERT INTO', 'INSERT IGNORE INTO', $m2[0]);
+        $ok = $m->query($insert);
+        echo "profile_exceptions insert: " . ($ok ? "OK ({$m->affected_rows} rows inserted)" : "FAILED: " . $m->error) . "\n";
+    } else {
+        echo "Could not extract INSERT from SqlForClientSchoolInc.php\n";
+    }
+}
+
 // Fix school_years and staff_school_relationship start dates so today falls within the active year
 $m->query("UPDATE school_years SET start_date='2026-01-01' WHERE school_id=1 AND syear=2026");
 echo "\nschool_years start_date fix: {$m->affected_rows} rows\n";
