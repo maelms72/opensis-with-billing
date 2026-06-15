@@ -12,20 +12,25 @@ APP_DIR="/var/www/html"
 
 echo "▶ Starting openSIS entrypoint..."
 
-# ── 1. Validate required environment variables ────────────────────────────────
-REQUIRED_VARS="DB_HOST DB_NAME DB_USER DB_PASS"
-for VAR in $REQUIRED_VARS; do
+# ── 1. Map Railway MySQL env vars → internal names ────────────────────────────
+# Railway's MySQL plugin injects MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, etc.
+# Fall back to DB_* for manual overrides.
+DB_HOST="${MYSQLHOST:-${DB_HOST:-}}"
+DB_PORT="${MYSQLPORT:-${DB_PORT:-3306}}"
+DB_NAME="${MYSQLDATABASE:-${DB_NAME:-railway}}"
+DB_USER="${MYSQLUSER:-${DB_USER:-}}"
+DB_PASS="${MYSQLPASSWORD:-${DB_PASS:-}}"
+APP_URL="${APP_URL:-http://localhost}"
+
+# ── 2. Validate required environment variables ────────────────────────────────
+for VAR in DB_HOST DB_NAME DB_USER DB_PASS; do
   if [ -z "${!VAR}" ]; then
-    echo "ERROR: Environment variable $VAR is not set."
-    echo "Set it in Railway: Project → Variables"
+    echo "ERROR: Could not resolve $VAR. Set MYSQL* vars via Railway MySQL service or DB_* manually."
     exit 1
   fi
 done
 
-DB_PORT="${DB_PORT:-3306}"
-APP_URL="${APP_URL:-http://localhost}"
-
-# ── 2. Write openSIS database config file ─────────────────────────────────────
+# ── 3. Write openSIS database config file ─────────────────────────────────────
 echo "▶ Writing database configuration..."
 cat > "$APP_DIR/DatabaseInc.php" <<EOF
 <?php
@@ -50,9 +55,9 @@ define('DB_PASS', '${DB_PASS}');
 EOF
 echo "  ✓ DatabaseInc.php written"
 
-# ── 3. Wait for MySQL to be ready ─────────────────────────────────────────────
+# ── 4. Wait for MySQL to be ready ─────────────────────────────────────────────
 echo "▶ Waiting for MySQL at ${DB_HOST}:${DB_PORT}..."
-MAX_TRIES=30
+MAX_TRIES=60
 COUNT=0
 until mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" -e "SELECT 1;" "$DB_NAME" >/dev/null 2>&1; do
   COUNT=$((COUNT + 1))
@@ -60,12 +65,12 @@ until mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" -e "SELECT 1;" "
     echo "ERROR: Could not connect to MySQL after ${MAX_TRIES} attempts. Check DB_* variables."
     exit 1
   fi
-  echo "  Attempt $COUNT/$MAX_TRIES — waiting 2s..."
-  sleep 2
+  echo "  Attempt $COUNT/$MAX_TRIES — waiting 3s..."
+  sleep 3
 done
 echo "  ✓ MySQL is ready"
 
-# ── 4. Run billing schema if not already installed ────────────────────────────
+# ── 5. Run billing schema if not already installed ────────────────────────────
 echo "▶ Checking billing schema..."
 TABLE_EXISTS=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" \
   -se "SELECT COUNT(*) FROM information_schema.tables
@@ -80,7 +85,7 @@ else
   echo "  ✓ Billing schema already present — skipping"
 fi
 
-# ── 5. Configure Apache to use Railway's $PORT ────────────────────────────────
+# ── 6. Configure Apache to use Railway's $PORT ────────────────────────────────
 APACHE_PORT="${PORT:-80}"
 echo "▶ Configuring Apache on port ${APACHE_PORT}..."
 
@@ -106,7 +111,7 @@ EOF
 
 echo "  ✓ Apache configured on port ${APACHE_PORT}"
 
-# ── 6. Set correct permissions ────────────────────────────────────────────────
+# ── 7. Set correct permissions ────────────────────────────────────────────────
 chown -R www-data:www-data /var/www/html/assets 2>/dev/null || true
 chmod -R 775 /var/www/html/assets 2>/dev/null || true
 
