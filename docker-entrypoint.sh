@@ -84,23 +84,31 @@ php -r "
 function run_sql_file(\$m, \$path) {
     \$sql = file_get_contents(\$path);
     if (\$sql === false) { echo \"ERROR: Cannot read \$path\n\"; exit(1); }
-    // Detect DELIMITER \$\$ pattern (used in procs/triggers)
-    if (strpos(\$sql, 'DELIMITER') !== false) {
-        // Split on \$\$ delimiter, strip DELIMITER lines, run each block
-        \$blocks = preg_split('/DELIMITER\s+\\\$\\\$\s*/i', \$sql);
-        foreach (\$blocks as \$block) {
-            foreach (array_filter(array_map('trim', explode('\$\$', \$block))) as \$stmt) {
-                \$stmt = trim(preg_replace('/DELIMITER\s+;.*$/mi', '', \$stmt));
-                if (\$stmt === '' || preg_match('/^(--|#)/', \$stmt)) continue;
-                if (!\$m->query(\$stmt)) { echo 'ERROR in ' . basename(\$path) . ': ' . \$m->error . \"\n\"; exit(1); }
-            }
+    \$lines = explode(\"\n\", \$sql);
+    \$buffer = '';
+    \$delimiter = ';';
+    foreach (\$lines as \$line) {
+        \$trimmed = trim(\$line);
+        if (\$trimmed === '' || strpos(\$trimmed, '--') === 0 || strpos(\$trimmed, '#') === 0) continue;
+        // Handle DELIMITER changes
+        if (preg_match('/^DELIMITER\s+(\S+)/i', \$trimmed, \$dm)) {
+            \$delimiter = \$dm[1];
+            continue;
         }
-    } else {
-        // Plain semicolon-delimited SQL
-        foreach (array_filter(array_map('trim', explode(';', \$sql))) as \$stmt) {
-            if (preg_match('/^(--|#)/i', \$stmt)) continue;
+        \$buffer .= \$line . \"\n\";
+        // Check if buffer ends with the current delimiter
+        if (substr(rtrim(\$buffer), -strlen(\$delimiter)) === \$delimiter) {
+            \$stmt = trim(substr(rtrim(\$buffer), 0, -strlen(\$delimiter)));
+            \$buffer = '';
+            if (\$stmt === '') continue;
             if (!\$m->query(\$stmt)) { echo 'ERROR in ' . basename(\$path) . ': ' . \$m->error . \"\n\"; exit(1); }
         }
+    }
+    // Execute any remaining buffered statement
+    \$stmt = trim(\$buffer);
+    if (\$stmt !== '' && substr(\$stmt, -1) === ';') { \$stmt = substr(\$stmt, 0, -1); }
+    if (\$stmt !== '') {
+        if (!\$m->query(\$stmt)) { echo 'ERROR in ' . basename(\$path) . ': ' . \$m->error . \"\n\"; exit(1); }
     }
 }
 
