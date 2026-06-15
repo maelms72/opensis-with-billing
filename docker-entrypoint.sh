@@ -15,12 +15,12 @@ echo "▶ Starting openSIS entrypoint..."
 # ── 1. Map Railway MySQL env vars → internal names ────────────────────────────
 # Railway's MySQL plugin injects MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, etc.
 # Fall back to DB_* for manual overrides.
-DB_HOST="${MYSQLHOST:-${DB_HOST:-}}"
-DB_PORT="${MYSQLPORT:-${DB_PORT:-3306}}"
-DB_NAME="${MYSQLDATABASE:-${DB_NAME:-railway}}"
-DB_USER="${MYSQLUSER:-${DB_USER:-}}"
-DB_PASS="${MYSQLPASSWORD:-${DB_PASS:-}}"
-APP_URL="${APP_URL:-http://localhost}"
+export DB_HOST="${MYSQLHOST:-${DB_HOST:-}}"
+export DB_PORT="${MYSQLPORT:-${DB_PORT:-3306}}"
+export DB_NAME="${MYSQLDATABASE:-${DB_NAME:-railway}}"
+export DB_USER="${MYSQLUSER:-${DB_USER:-}}"
+export DB_PASS="${MYSQLPASSWORD:-${DB_PASS:-}}"
+export APP_URL="${APP_URL:-http://localhost}"
 
 # ── 2. Validate required environment variables ────────────────────────────────
 for VAR in DB_HOST DB_NAME DB_USER DB_PASS; do
