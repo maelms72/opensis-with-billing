@@ -17,9 +17,12 @@ if ($m->connect_errno) {
     exit(1);
 }
 
-// Use login_authentication as sentinel — it's absent on partial/fresh installs
+// api_info is the first table created by the schema; its presence means
+// the schema has been run (fully or partially). On a truly fresh DB it won't
+// exist. Error 1050 (table already exists) is suppressed in the drain loop
+// so a partial install can be completed safely on re-run.
 $res = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables
-    WHERE table_schema='$name' AND table_name='login_authentication'");
+    WHERE table_schema='$name' AND table_name='api_info'");
 $has_core = (int) $res->fetch_assoc()['c'];
 
 if ($has_core === 0) {
@@ -64,9 +67,11 @@ function run_multi(mysqli $m, string $path): void {
         echo "ERROR in " . basename($path) . ": " . $m->error . "\n";
         exit(1);
     }
-    // Drain all result sets so connection is ready for the next call
+    // Drain all result sets; suppress 1050 (table already exists) so a
+    // partial install can be completed without crashing on pre-existing tables.
     do {
         if ($r = $m->store_result()) $r->free();
+        if ($m->errno === 1050) continue;
     } while ($m->more_results() && $m->next_result());
 }
 
