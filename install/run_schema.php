@@ -34,18 +34,28 @@ if ($has_core === 0) {
     echo "  ✓ Procs done\n";
     run_delimited($m, "$app/install/OpensisTriggerMysqlInc.sql");
     echo "  ✓ Triggers done\n";
-    // Seed app version rows — normally written by the PHP installer which we bypass.
-    // Without these, UpgradeInc.php sees an empty build date, computes a pre-2009
-    // timestamp, and redirects every request to install/index.php?upreq=true.
-    $m->query("INSERT IGNORE INTO `app` (`name`, `value`) VALUES
-        ('version', '9.3'),
-        ('date',    'February 06, 2026'),
-        ('build',   '20250827001'),
-        ('update',  '0'),
-        ('last_updated', 'February 06, 2026')");
-    echo "  ✓ app version seeded\n";
 } else {
     echo "  ✓ Core schema already present\n";
+}
+
+// Seed required data if app table is empty.
+// SqlForClientSchoolInc.php assigns all seed SQL to $text — include it and run it.
+// This is normally executed by the interactive PHP installer which we bypass.
+$app_rows = (int) $m->query("SELECT COUNT(*) AS c FROM `app`")->fetch_assoc()['c'];
+if ($app_rows === 0) {
+    echo "  Seeding initial data...\n";
+    chdir("$app/install");
+    // Suppress the require_once inside SqlForClientSchoolInc.php (PragRepFnc.php)
+    // by defining its key function if not already defined.
+    if (!function_exists('validateQueryString')) {
+        function validateQueryString($url) { return $url; }
+    }
+    $text = '';
+    require "$app/install/SqlForClientSchoolInc.php";
+    run_multi_str($m, $text);
+    echo "  ✓ Initial data seeded\n";
+} else {
+    echo "  ✓ Seed data already present\n";
 }
 
 $res = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables
@@ -64,6 +74,32 @@ $m->close();
 exit(0);
 
 // ---------------------------------------------------------------------------
+
+function run_multi_str(mysqli $m, string $sql): void {
+    $sql = preg_replace('/^\s*--\S[^\n]*$/m', '', $sql);
+    $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
+    $segments = preg_split('/^DELIMITER\s+(\S+)\s*$/mi', $sql, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $delimiter = ';';
+    foreach ($segments as $segment) {
+        $segment = trim($segment);
+        if ($segment === '') continue;
+        if (preg_match('/^\S+$/', $segment) && strlen($segment) <= 10 && !str_contains($segment, ' ')) {
+            $delimiter = $segment;
+            continue;
+        }
+        $stmts = array_filter(array_map('trim', explode($delimiter, $segment)));
+        foreach ($stmts as $stmt) {
+            if ($stmt === '') continue;
+            try {
+                $m->query($stmt);
+            } catch (\mysqli_sql_exception $e) {
+                if ($e->getCode() === 1050 || $e->getCode() === 1062) continue;
+                echo "ERROR seeding (errno {$e->getCode()}): " . $e->getMessage() . "\n";
+                exit(1);
+            }
+        }
+    }
+}
 
 function run_multi(mysqli $m, string $path): void {
     $sql = file_get_contents($path);
