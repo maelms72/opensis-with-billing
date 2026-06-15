@@ -55,7 +55,9 @@ if ($app_rows === 0) {
     $_SESSION['password']            = getenv('DB_PASS');
     $_SESSION['syear']               = date('Y');
     $_SESSION['sname']               = 'Default School';
-    $_SESSION['user_school_beg_date'] = date('Y') . '-08-01';
+    // Use Jan 1 of the current year so today always falls within the active school year
+    // regardless of when the container first boots.
+    $_SESSION['user_school_beg_date'] = date('Y') . '-01-01';
     $_SESSION['user_school_end_date'] = (date('Y') + 1) . '-06-30';
     $text = '';
     require "$app/install/SqlForClientSchoolInc.php";

@@ -57,5 +57,15 @@ $jr = $m->query("SELECT PROFILE,STAFF_ID,CURRENT_SCHOOL_ID,FIRST_NAME,LAST_NAME,
 $jr_row = $jr ? $jr->fetch_assoc() : null;
 echo "login_RET query: " . ($jr_row ? "OK syear={$jr_row['SYEAR']} name={$jr_row['FIRST_NAME']} {$jr_row['LAST_NAME']}" : "NO ROWS (login will fail)") . "\n";
 
+// Fix school_years and staff_school_relationship start dates so today falls within the active year
+$m->query("UPDATE school_years SET start_date='2026-01-01' WHERE school_id=1 AND syear=2026");
+echo "\nschool_years start_date fix: {$m->affected_rows} rows\n";
+$m->query("UPDATE staff_school_relationship SET start_date='2026-01-01' WHERE staff_id=1 AND syear=2026");
+echo "staff_school_rel start_date fix: {$m->affected_rows} rows\n";
+
+// Confirm active school year query now returns a result
+$active = $m->query("SELECT MAX(SYEAR) AS SYEAR FROM school_years WHERE CURDATE() BETWEEN start_date AND end_date AND school_id=1")->fetch_assoc();
+echo "Active syear (CURDATE between start/end): " . ($active['SYEAR'] ?? '(none - login will have no school)') . "\n";
+
 $m->close();
 echo "\n</pre>\n";
