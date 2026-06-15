@@ -49,8 +49,15 @@ if (strlen($out) > 0) {
 // Reset admin password to a known value
 $newpass = 'Admin1234!';
 $newhash = password_hash($newpass, PASSWORD_DEFAULT);
-$m->query("UPDATE login_authentication SET password='$newhash' WHERE username='os4ed'");
-echo "\nAdmin password reset to: $newpass (username: os4ed)\n";
+$ok = $m->query("UPDATE login_authentication SET password='$newhash' WHERE username='os4ed'");
+$affected = $m->affected_rows;
+echo "\nPassword reset: " . ($ok ? "OK ($affected rows updated)" : "FAILED: " . $m->error) . "\n";
+echo "Login with  username=os4ed  password=$newpass\n";
+
+// Verify the hash we just wrote
+$row = $m->query("SELECT password FROM login_authentication WHERE username='os4ed'")->fetch_assoc();
+echo "Hash in DB now: " . substr($row['password'] ?? '(null)', 0, 10) . "...\n";
+echo "password_verify check: " . (password_verify($newpass, $row['password'] ?? '') ? 'PASS' : 'FAIL') . "\n";
 
 $m->close();
 echo "\n</pre>\n";
