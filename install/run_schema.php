@@ -64,12 +64,16 @@ function run_multi(mysqli $m, string $path): void {
 
     // Split and run one statement at a time so a 1050 (table already exists)
     // on one statement doesn't abort the rest of the file.
+    // PHP 8.2 throws mysqli_sql_exception on query errors, so use try/catch
+    // rather than return-value checks — otherwise the 1050 skip never runs.
     $stmts = array_filter(array_map('trim', explode(';', $sql)));
     foreach ($stmts as $stmt) {
         if ($stmt === '') continue;
-        if (!$m->query($stmt)) {
-            if ($m->errno === 1050) continue; // table already exists — safe to skip
-            echo "ERROR in " . basename($path) . " (errno {$m->errno}): " . $m->error . "\n";
+        try {
+            $m->query($stmt);
+        } catch (\mysqli_sql_exception $e) {
+            if ($e->getCode() === 1050) continue; // table already exists — safe to skip
+            echo "ERROR in " . basename($path) . " (errno {$e->getCode()}): " . $e->getMessage() . "\n";
             exit(1);
         }
     }
