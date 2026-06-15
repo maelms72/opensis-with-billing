@@ -35,7 +35,9 @@ RUN echo "upload_max_filesize = 20M\n\
 post_max_size = 20M\n\
 memory_limit = 256M\n\
 max_execution_time = 60\n\
-date.timezone = UTC" > /usr/local/etc/php/conf.d/opensis.ini
+date.timezone = UTC\n\
+display_errors = On\n\
+error_reporting = E_ALL" > /usr/local/etc/php/conf.d/opensis.ini
 
 # Apache config: allow .htaccess overrides
 RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
