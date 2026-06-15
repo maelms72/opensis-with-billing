@@ -60,7 +60,8 @@ function run_multi(mysqli $m, string $path): void {
     if ($sql === false) { echo "ERROR: Cannot read $path\n"; exit(1); }
 
     // Strip --WORD comments (no space after --) that MySQL rejects as syntax errors.
-    $sql = preg_replace('/^--\S[^\n]*$/m', '', $sql);
+    // Allow optional leading whitespace before the -- so lines like " --ALTER" are caught.
+    $sql = preg_replace('/^\s*--\S[^\n]*$/m', '', $sql);
 
     // Strip /* ... */ block comments (may contain semicolons that would
     // produce invalid fragments when splitting on ';').
