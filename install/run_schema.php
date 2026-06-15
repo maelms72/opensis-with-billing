@@ -45,11 +45,13 @@ $app_rows = (int) $m->query("SELECT COUNT(*) AS c FROM `app`")->fetch_assoc()['c
 if ($app_rows === 0) {
     echo "  Seeding initial data...\n";
     chdir("$app/install");
-    // Suppress the require_once inside SqlForClientSchoolInc.php (PragRepFnc.php)
-    // by defining its key function if not already defined.
-    if (!function_exists('validateQueryString')) {
-        function validateQueryString($url) { return $url; }
-    }
+    // SqlForClientSchoolInc.php reads DB credentials from $_SESSION at line 218.
+    // There is no web session in the CLI entrypoint, so populate it manually.
+    $_SESSION['dbserver']   = getenv('DB_HOST');
+    $_SESSION['dbport']     = getenv('DB_PORT');
+    $_SESSION['dbname']     = getenv('DB_NAME');
+    $_SESSION['dbuser']     = getenv('DB_USER');
+    $_SESSION['dbpassword'] = getenv('DB_PASS');
     $text = '';
     require "$app/install/SqlForClientSchoolInc.php";
     run_multi_str($m, $text);
