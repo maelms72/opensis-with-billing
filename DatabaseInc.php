@@ -29,6 +29,23 @@
 include 'RedirectRootInc.php';
 include 'ConnectionClass.php';
 require_once "functions/PragRepFnc.php";
+
+// Read credentials from Railway env vars (MYSQL*) or DB_* fallbacks.
+// These are set by the Railway MySQL service at container runtime.
+$DatabaseServer   = getenv('MYSQLHOST')     ?: (getenv('DB_HOST')     ?: '');
+$DatabasePort     = getenv('MYSQLPORT')     ?: (getenv('DB_PORT')     ?: '3306');
+$DatabaseName     = getenv('MYSQLDATABASE') ?: (getenv('DB_NAME')     ?: 'railway');
+$DatabaseUsername = getenv('MYSQLUSER')     ?: (getenv('DB_USER')     ?: '');
+$DatabasePassword = getenv('MYSQLPASSWORD') ?: (getenv('DB_PASS')     ?: '');
+$DatabaseType     = 'mysqli';
+
+// Constants used by billing module, diag.php, and run_schema.php.
+if (!defined('DB_HOST')) define('DB_HOST', $DatabaseServer);
+if (!defined('DB_PORT')) define('DB_PORT', $DatabasePort);
+if (!defined('DB_NAME')) define('DB_NAME', $DatabaseName);
+if (!defined('DB_USER')) define('DB_USER', $DatabaseUsername);
+if (!defined('DB_PASS')) define('DB_PASS', $DatabasePassword);
+
 function db_start()
 {
     global $DatabaseServer, $DatabaseUsername, $DatabasePassword, $DatabaseName, $DatabasePort, $DatabaseType, $connection;
@@ -38,7 +55,7 @@ function db_start()
 
             if ($connection->auto_init == true) {
                 $connection = $connection->init($DatabaseServer, $DatabaseUsername, $DatabasePassword, $DatabaseName);
-                mysqli_set_charset($connection, "utf8");
+                if ($connection) mysqli_set_charset($connection, "utf8");
             }
             break;
     }
