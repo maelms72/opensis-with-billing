@@ -34,6 +34,16 @@ if ($has_core === 0) {
     echo "  ✓ Procs done\n";
     run_delimited($m, "$app/install/OpensisTriggerMysqlInc.sql");
     echo "  ✓ Triggers done\n";
+    // Seed app version rows — normally written by the PHP installer which we bypass.
+    // Without these, UpgradeInc.php sees an empty build date, computes a pre-2009
+    // timestamp, and redirects every request to install/index.php?upreq=true.
+    $m->query("INSERT IGNORE INTO `app` (`name`, `value`) VALUES
+        ('version', '9.3'),
+        ('date',    'February 06, 2026'),
+        ('build',   '20250827001'),
+        ('update',  '0'),
+        ('last_updated', 'February 06, 2026')");
+    echo "  ✓ app version seeded\n";
 } else {
     echo "  ✓ Core schema already present\n";
 }
