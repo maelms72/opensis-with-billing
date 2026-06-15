@@ -55,6 +55,10 @@ if ($app_rows === 0) {
     $text = '';
     require "$app/install/SqlForClientSchoolInc.php";
     run_multi_str($m, $text);
+    // SqlForClientSchoolInc.php stores build as YYYYMMDDREV but UpgradeInc.php
+    // parses it as MMDDYYYYREV (month=0-1, day=2-3, year=4-7). Fix it so the
+    // computed date falls after the 05/28/2009 cutoff and no upgrade redirect fires.
+    $m->query("UPDATE `app` SET `value`='02062026001' WHERE `name`='build'");
     echo "  ✓ Initial data seeded\n";
 } else {
     echo "  ✓ Seed data already present\n";
