@@ -139,5 +139,8 @@ echo "  ✓ Apache configured on port ${APACHE_PORT}"
 chown -R www-data:www-data /var/www/html/assets 2>/dev/null || true
 chmod -R 775 /var/www/html/assets 2>/dev/null || true
 
+# Ensure only mpm_prefork is active (runtime safety net)
+rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* 2>/dev/null || true
+
 echo "▶ Starting Apache..."
 exec "$@"
