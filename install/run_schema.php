@@ -62,6 +62,12 @@ function run_multi(mysqli $m, string $path): void {
     // Strip --WORD comments (no space after --) that MySQL rejects as syntax errors.
     $sql = preg_replace('/^--\S[^\n]*$/m', '', $sql);
 
+    // Strip /* ... */ block comments before splitting on semicolons.
+    // Block comments can contain semicolons which would otherwise produce
+    // invalid SQL fragments when the file is split on ';'.
+    // Use the 's' flag so '.' matches newlines (handles multi-line blocks).
+    $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
+
     // Split and run one statement at a time so a 1050 (table already exists)
     // on one statement doesn't abort the rest of the file.
     // PHP 8.2 throws mysqli_sql_exception on query errors, so use try/catch
