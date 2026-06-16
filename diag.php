@@ -136,6 +136,11 @@ if (isset($_GET['fix_gradescales'])) {
     echo "\nGrade scales cleared. Refresh to confirm.\n";
 }
 
+// Check msg_inbox table (queried first in Portal.php - if missing, die() kills page)
+echo "\n--- msg_inbox ---\n";
+$r = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema='$name' AND table_name='msg_inbox'");
+echo "  msg_inbox table: " . ((int)$r->fetch_assoc()['c'] ? "EXISTS" : "MISSING - THIS CAUSES BLANK HOME PAGE") . "\n";
+
 // Check portal_notes table and program_config UPDATENOTIFY
 echo "\n--- portal_notes ---\n";
 $r = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema='$name' AND table_name='portal_notes'");

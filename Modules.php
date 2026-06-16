@@ -904,6 +904,9 @@ if (!isset($_REQUEST['_openSIS_PDF'])) {
 }
 
 //print_r($_REQUEST['modname']);
+if (!$_REQUEST['modname'] && !$_GET['modname']) {
+    include 'modules/miscellaneous/Portal.php';
+}
 if ($_REQUEST['modname'] || $_GET['modname']) {
     /*     * *****************back to list*************************** */
     if ($_REQUEST['bottom_back'] && $_SESSION['staff_id'])
