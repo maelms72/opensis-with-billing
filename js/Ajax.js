@@ -45,18 +45,20 @@ function loadContent(url, postData) {
     });
 }
 
-// Delegated submit handler: intercepts any form inside #content that posts to Modules.php,
-// converts the action to Ajax.php, and keeps the response inside #content.
-$(document).off('submit.contentform').on('submit.contentform', '#content form', function(e) {
-    var form = $(this);
-    var action = (form.attr('action') || '').replace(/&amp;/g, '&');
-    if (action.indexOf('Modules.php') === -1) { return true; }
-    e.preventDefault();
-    var ajaxAction = action.replace('Modules.php', 'Ajax.php');
-    loadContent(ajaxAction, form.serialize());
-});
-
+var _contentFormHandlerBound = false;
 function check_content(the_content) {
+    // Bind once after jQuery is available: intercept form POSTs inside #content
+    // so delete confirmations and other forms stay within the Ajax flow.
+    if (!_contentFormHandlerBound) {
+        _contentFormHandlerBound = true;
+        $(document).on('submit.contentform', '#content form', function(e) {
+            var form = $(this);
+            var action = (form.attr('action') || '').replace(/&amp;/g, '&');
+            if (action.indexOf('Modules.php') === -1) { return true; }
+            e.preventDefault();
+            loadContent(action.replace('Modules.php', 'Ajax.php'), form.serialize());
+        });
+    }
     loadContent(the_content);
 }
 function parseCheck_content() {
