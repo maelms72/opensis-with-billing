@@ -74,10 +74,12 @@ if ($app_rows === 0) {
     // parses it as MMDDYYYYREV (month=0-1, day=2-3, year=4-7). Fix it so the
     // computed date falls after the 05/28/2009 cutoff and no upgrade redirect fires.
     $m->query("UPDATE `app` SET `value`='02062026001' WHERE `name`='build'");
-    // profile_id=0 in login_authentication has no matching user_profiles row (IDs start at 1).
-    // The login code resolves the profile via user_profiles WHERE ID=profile_id, so 0 never
-    // matches 'admin' and the session is never set. Fix it to profile_id=1 (admin).
+    // profile_id=0 in login_authentication doesn't match user_profiles ID=1 ('admin').
+    // Also, User() in UserFnc.php joins login_authentication and staff on PROFILE_ID —
+    // they MUST be equal or User('PROFILE') returns empty and the nav menu is blank.
+    // Fix both tables to profile_id=1 (admin).
     $m->query("UPDATE `login_authentication` SET `profile_id`=1 WHERE `username`='os4ed'");
+    $m->query("UPDATE `staff` SET `profile_id`=1 WHERE `staff_id`=1");
     // system_preference_misc is never seeded by any installer file but must
     // have exactly one row — openSIS reads it on every page for maintenance
     // mode, failed-login limits, and activity-day checks.

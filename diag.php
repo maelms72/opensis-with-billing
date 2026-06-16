@@ -26,9 +26,13 @@ foreach (['app','login_authentication','system_preference_misc','school_years','
 $build = $m->query("SELECT value FROM app WHERE name='build' LIMIT 1")->fetch_assoc();
 echo "app.build: " . ($build['value'] ?? '(null)') . "\n";
 
-// Fix profile_id=0 -> 1 (admin) so login path resolves the profile correctly
+// Fix profile_id=0 -> 1 (admin) in BOTH tables so la.PROFILE_ID=s.PROFILE_ID matches.
+// User() in UserFnc.php joins login_authentication and staff on PROFILE_ID — they must be equal.
 $ok1 = $m->query("UPDATE login_authentication SET profile_id=1 WHERE username='os4ed'");
-echo "\nprofile_id fix: " . ($ok1 ? "OK ({$m->affected_rows} rows updated)" : "FAILED: " . $m->error) . "\n";
+echo "\nlogin_authentication profile_id fix: " . ($ok1 ? "OK ({$m->affected_rows} rows)" : "FAILED: " . $m->error) . "\n";
+$ok1b = $m->query("UPDATE staff SET profile_id=1 WHERE staff_id=1");
+echo "staff profile_id fix: " . ($ok1b ? "OK ({$m->affected_rows} rows)" : "FAILED: " . $m->error) . "\n";
+// (profile_id fix output moved up)
 
 // Reset password
 $newpass = 'Admin1234!';
