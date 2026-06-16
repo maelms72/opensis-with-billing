@@ -652,7 +652,9 @@ foreach ($_openSIS['Menu'] as $modcat => $programs) {
             } elseif ($modcat == 'schoolsetup')
                 echo "<li " . (($current_mod == $modcat) ? 'class="active"' : '') . "><a HREF=javascript:void(0)><i class=\"{$menu_icons[$modcat]}\"></i><span>" . _schoolSetup . "</span></a>";
             else {
-                echo "<li " . (($current_mod == $modcat) ? 'class="active"' : '') . "><a HREF=javascript:void(0)><i class=\"{$menu_icons[$modcat]}\"></i><span>" . ucfirst(str_replace('_', ' ', constant('_' . $modcat))) . "</span></a>";
+                $modcat_icon = $menu_icons[$modcat] ?? 'icon-menu7';
+                $modcat_label = defined('_' . $modcat) ? ucfirst(str_replace('_', ' ', constant('_' . $modcat))) : ucfirst($modcat);
+                echo "<li " . (($current_mod == $modcat) ? 'class="active"' : '') . "><a HREF=javascript:void(0)><i class=\"{$modcat_icon}\"></i><span>" . $modcat_label . "</span></a>";
             }
         }
 
@@ -677,11 +679,11 @@ foreach ($_openSIS['Menu'] as $modcat => $programs) {
                     echo "<li><A HREF=$file target=_blank>$title</A>";
                 elseif (!is_numeric($file))
                     if (User('PROFILE') == 'student' && $title == "Student Info") {
-                        echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(constant($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">My Info</A>";
+                        echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(defined($modcat) ? constant($modcat) : $modcat) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">My Info</A>";
                     } elseif (User('PROFILE') == 'student' && $title == "Schedule") {
-                        echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(constant($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">My Schedule</A>";
+                        echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(defined($modcat) ? constant($modcat) : $modcat) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">My Schedule</A>";
                     } elseif (User('PROFILE') == 'student' && $title == "Student Requests") {
-                        echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(constant($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">My Requests</A>";
+                        echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(defined($modcat) ? constant($modcat) : $modcat) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">My Requests</A>";
                     } else {
 
                         if ($modcat == 'eligibility')
@@ -689,9 +691,9 @@ foreach ($_openSIS['Menu'] as $modcat => $programs) {
                         else {
                             if (User('PROFILE_ID') != 0 && User('PROFILE') == 'admin') {
                                 if ($modcat == 'tools' && $title != 'Backup Database')
-                                    echo "<li  " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(constant($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . str_replace('&', '?', $file) . "';\">$title</A>";
+                                    echo "<li  " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(defined($modcat) ? constant($modcat) : $modcat) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . str_replace('&', '?', $file) . "';\">$title</A>";
                                 if ($modcat != 'tools')
-                                    echo "<li  " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ($modcat == 'schoolsetup' ? _schoolSetup : ucwords(constant($modcat))) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . str_replace('&', '?', $file) . "';\">$title</A>";
+                                    echo "<li  " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . (defined('_' . $modcat) ? ucwords(constant('_' . $modcat)) : ucfirst($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . str_replace('&', '?', $file) . "';\">$title</A>";
                             } else
                                 echo "<li  " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=hm HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='$(\"#header\").html(\"" . ($modcat == 'schoolsetup' ? _schoolSetup : ucwords(str_replace('_', ' ', constant("_" . $modcat)))) . " &rsaquo;" . $title . "\");' onmouseup=\"$('#cframe').attr('src','Bottom.php?modname=" . str_replace('&', '?', $file) . "');\">$title</A>";
                         }
@@ -725,14 +727,14 @@ foreach ($_openSIS['Menu'] as $modcat => $programs) {
 
                         if (User('PROFILE_ID') != 0 && User('PROFILE') == 'admin') {
                             if ($modcat == 'tools' && $title != 'At a Glance' && $title != 'Institute Reports' && $title != 'Institute Custom Field Reports')
-                                echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=dd HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(constant($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">$title</A>";
+                                echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=dd HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ucwords(defined($modcat) ? constant($modcat) : $modcat) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">$title</A>";
                             //                                            
                             if ($modcat != 'tools') {
 
-                                echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=dd HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ($modcat == 'schoolsetup' ? _schoolSetup : ucwords(constant($modcat))) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">$title</A>";
+                                echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=dd HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . (defined('_' . $modcat) ? ucwords(constant('_' . $modcat)) : ucfirst($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">$title</A>";
                             }
                         } else
-                            echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=dd HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . ($modcat == 'schoolsetup' ? _schoolSetup : ucwords(constant($modcat))) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">$title</A>";
+                            echo "<li " . (($current_menu == $title) ? 'class="current-submenu"' : '') . "><A id=dd HREF=javascript:void(0) onClick='check_content(\"Ajax.php?modname=" . $file . " \");'  onmousedown='document.getElementById(\"header\").innerHTML = \"" . (defined('_' . $modcat) ? ucwords(constant('_' . $modcat)) : ucfirst($modcat)) . " &rsaquo;" . "$title\"' onmouseup=\"document.getElementById('cframe').src='Bottom.php?modname=" . $file . "';\">$title</A>";
                     }
                 } elseif ($keys[$key_index + 1] && !is_numeric($keys[$key_index + 1])) {
                     $mm = $mm + 1;
