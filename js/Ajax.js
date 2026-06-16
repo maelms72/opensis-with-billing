@@ -24,29 +24,50 @@ var request = makeObject();
 
 var the_content;
 function check_content(the_content) {
-    var allIds = Array.from(document.querySelectorAll('[id]')).map(function(e){return e.id});
-    console.log('check_content called:', the_content, '| total IDs:', allIds.length, '| has content:', allIds.indexOf('content'), '| last 10 IDs:', allIds.slice(-10).join(','));
-    var bodyHTML = document.body ? document.body.innerHTML : 'NO BODY';
-    console.log('body innerHTML length:', bodyHTML.length, '| last 300:', bodyHTML.slice(-300));
     $('#loading-image').show();
     $.ajax(the_content).done(function (data) {
-        console.log('Ajax done, len:', data.length);
         var headHtml = '';
         var headMatch = data.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
         if (headMatch) {
             headHtml = headMatch[1].replace(/<(?!script|link|\/script|\/link)[^>]+>/gi, '');
         }
         var bodyHtml = data.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
-        console.log('bodyHtml first 200:', bodyHtml.substring(0, 200));
         var el = document.getElementById('content');
-        console.log('#content via getElementById:', el ? 'FOUND' : 'NOT FOUND');
         if (el) {
             el.innerHTML = headHtml + bodyHtml;
-            console.log('innerHTML set, el still in DOM?', document.getElementById('content') ? 'YES' : 'NO');
         }
         $('#loading-image').hide();
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.log('AJAX FAILED:', textStatus, errorThrown, 'status:', jqXHR.status);
+        // Intercept form submits inside #content so POST actions (e.g. delete
+        // confirmations) stay within the Ajax flow instead of navigating the page.
+        $('#content form').off('submit.ajax').on('submit.ajax', function(e) {
+            var form = $(this);
+            var action = form.attr('action') || '';
+            // Convert Modules.php action to Ajax.php so the response renders in #content
+            var ajaxAction = action.replace('Modules.php', 'Ajax.php');
+            if (ajaxAction === action) { return true; } // not a Modules.php form — let it submit normally
+            e.preventDefault();
+            $('#loading-image').show();
+            $.ajax({
+                url: ajaxAction,
+                type: form.attr('method') || 'GET',
+                data: form.serialize()
+            }).done(function(resp) {
+                var rHead = '';
+                var rHeadMatch = resp.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+                if (rHeadMatch) {
+                    rHead = rHeadMatch[1].replace(/<(?!script|link|\/script|\/link)[^>]+>/gi, '');
+                }
+                var rBody = resp.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
+                var el2 = document.getElementById('content');
+                if (el2) { el2.innerHTML = rHead + rBody; }
+                $('#loading-image').hide();
+                // Re-bind form intercept for any new forms rendered (e.g. after delete, list reloads)
+                $('#content form').off('submit.ajax').on('submit.ajax', arguments.callee);
+            }).fail(function() {
+                $('#loading-image').hide();
+            });
+        });
+    }).fail(function() {
         $('#loading-image').hide();
     });
 }
