@@ -65,12 +65,6 @@ function check_content(the_content) {
             if (btn && btn.attr('name')) {
                 data += (data ? '&' : '') + encodeURIComponent(btn.attr('name')) + '=' + encodeURIComponent(btn.val());
             }
-            var ajaxUrl = action.replace('Modules.php', 'Ajax.php');
-            console.log('POST to:', ajaxUrl, 'data:', data);
-            $.post(ajaxUrl, data).done(function(resp) {
-                console.log('DELETE resp len:', resp.length, 'first 500:', resp.substring(0, 500));
-            });
-            return;
             loadContent(action.replace('Modules.php', 'Ajax.php'), data);
         });
     }
