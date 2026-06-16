@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 #**************************************************************************
 #  openSIS is a free student information system for public and non-public 
 #  schools from Open Solutions for Education, Inc. web: www.os4ed.com
@@ -28,6 +28,7 @@
 include('../../RedirectModulesInc.php');
 $menu['tools']['admin'] = array(
 						
+                               'tools/StudentCsvImport.php'=>'Student CSV Import',
                                'tools/LogDetails.php'=>_accessLog,
 			                         'tools/DeleteLog.php'=>_deleteLog,
                                'tools/Rollover.php'=>_rollover,
@@ -40,3 +41,4 @@ $menu['tools']['admin'] = array(
                                'tools/Reports.php?func=Ins_cf'=>_instituteCustomFieldReports,
     );
 ?>
+
