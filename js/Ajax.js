@@ -26,12 +26,21 @@ var the_content;
 function check_content(the_content) {
     $('#loading-image').show();
     $.ajax(the_content).done(function (data) {
-        console.log('AJAX done. URL:', the_content, 'len:', data.length, 'last500:', data.substring(data.length-500));
-        $('#content').html('<div style="background:red;color:white;font-size:20px;padding:20px;z-index:9999;position:relative">DEBUG: Ajax response received (' + data.length + ' bytes). If you see this, #content is updating.</div>' + data);
-        console.log('After html(), #content inner length:', $('#content').html().length);
+        // Ajax.php wraps every response in a full HTML document via Warehouse('header'/'footer').
+        // Injecting a complete <html><head>...</head>...<body>...</body></html> into a <div>
+        // via jQuery .html() causes the browser's fragment parser to discard/misplace content.
+        // Fix: extract <head> scripts/links (module-specific assets) + body content separately.
+        var headHtml = '';
+        var headMatch = data.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+        if (headMatch) {
+            // Keep only <script> and <link> tags from the head (not meta/title etc.)
+            headHtml = headMatch[1].replace(/<(?!script|link|\/script|\/link)[^>]+>/gi, '');
+        }
+        var bodyHtml = data.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
+        $('#content').html(headHtml + bodyHtml);
         $('#loading-image').hide();
     }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.log('AJAX FAILED:', textStatus, errorThrown, 'status:', jqXHR.status, 'response:', jqXHR.responseText.substring(0, 300));
+        console.log('AJAX FAILED:', textStatus, errorThrown, 'status:', jqXHR.status);
         $('#loading-image').hide();
     });
 }
