@@ -1218,7 +1218,7 @@ function replace_croatain($str)
 function curPageURL()
 {
    $pageURL = 'http';
-   if ($_SERVER["HTTPS"] == "on") {
+   if (($_SERVER["HTTPS"] ?? '') == "on") {
       $pageURL .= "s";
    }
    $pageURL .= "://";
