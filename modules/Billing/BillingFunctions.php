@@ -256,7 +256,7 @@ function BillingGetInvoice(int $invoice_id, int $school_id): array
         "SELECT i.*,
                 CONCAT(s.FIRST_NAME,' ',s.LAST_NAME) AS student_name,
                 s.STUDENT_ID AS student_number,
-                s.GRADE AS grade
+                '' AS grade
          FROM billing_invoices i
          JOIN students s ON s.STUDENT_ID = i.student_id
          WHERE i.id='{$invoice_id}' AND i.school_id='{$school_id}'"
@@ -299,7 +299,7 @@ function BillingGetInvoices(int $school_id, int $syear, array $filters = []): ar
     }
 
     $RET = DBGet(DBQuery(
-        "SELECT i.*, CONCAT(s.FIRST_NAME,' ',s.LAST_NAME) AS student_name, s.GRADE AS grade
+        "SELECT i.*, CONCAT(s.FIRST_NAME,' ',s.LAST_NAME) AS student_name, '' AS grade
          FROM billing_invoices i
          JOIN students s ON s.STUDENT_ID = i.student_id
          WHERE {$where}
