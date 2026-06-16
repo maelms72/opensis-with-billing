@@ -35,8 +35,12 @@ function check_content(the_content) {
         }
         var bodyHtml = data.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
         console.log('bodyHtml first 200:', bodyHtml.substring(0, 200));
-        $('#content').html(headHtml + bodyHtml);
-        console.log('#content html length after set:', $('#content').html().length);
+        var el = document.getElementById('content');
+        console.log('#content via getElementById:', el ? 'FOUND' : 'NOT FOUND');
+        if (el) {
+            el.innerHTML = headHtml + bodyHtml;
+            console.log('innerHTML set, el still in DOM?', document.getElementById('content') ? 'YES' : 'NO');
+        }
         $('#loading-image').hide();
     }).fail(function(jqXHR, textStatus, errorThrown) {
         console.log('AJAX FAILED:', textStatus, errorThrown, 'status:', jqXHR.status);
