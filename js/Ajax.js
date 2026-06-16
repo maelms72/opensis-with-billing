@@ -26,7 +26,11 @@ var the_content;
 function check_content(the_content) {
     $('#loading-image').show();
     $.ajax(the_content).done(function (data) {
-        console.log('AJAX URL:', the_content, '| response length:', data.length, '| first 300:', data.substring(0, 300));
+        console.log('AJAX URL:', the_content, '| response length:', data.length);
+        console.log('chars 0-300:', data.substring(0, 300));
+        console.log('chars 10000-10500:', data.substring(10000, 10500));
+        console.log('chars 20000-20500:', data.substring(20000, 20500));
+        console.log('chars LAST 500:', data.substring(data.length - 500));
         $('#content').html(data);
         $('#loading-image').hide();
     }).fail(function(jqXHR, textStatus, errorThrown) {
