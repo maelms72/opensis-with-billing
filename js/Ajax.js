@@ -51,16 +51,22 @@ function check_content(the_content) {
     // so delete confirmations and other forms stay within the Ajax flow.
     if (!_contentFormHandlerBound) {
         _contentFormHandlerBound = true;
+        // Track the last clicked submit button so we can include it in form.serialize()
+        $(document).on('click.contentform', '#content form [type=submit]', function() {
+            $(this).closest('form').data('clicked-btn', $(this));
+        });
         $(document).on('submit.contentform', '#content form', function(e) {
             var form = $(this);
             var action = (form.attr('action') || '').replace(/&amp;/g, '&');
-            console.log('FORM SUBMIT intercepted, action:', action, 'method:', form.attr('method'));
-            if (action.indexOf('Modules.php') === -1) { console.log('not Modules.php, letting through'); return true; }
+            if (action.indexOf('Modules.php') === -1) { return true; }
             e.preventDefault();
-            console.log('prevented default, posting to Ajax.php');
-            loadContent(action.replace('Modules.php', 'Ajax.php'), form.serialize());
+            var data = form.serialize();
+            var btn = form.data('clicked-btn');
+            if (btn && btn.attr('name')) {
+                data += (data ? '&' : '') + encodeURIComponent(btn.attr('name')) + '=' + encodeURIComponent(btn.val());
+            }
+            loadContent(action.replace('Modules.php', 'Ajax.php'), data);
         });
-        console.log('contentform handler bound');
     }
     loadContent(the_content);
 }
