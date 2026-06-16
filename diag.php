@@ -124,5 +124,17 @@ echo "\n--- report_card_grades (rows within scales) ---\n";
 $r = $m->query("SELECT ID, GRADE_SCALE_ID, TITLE, GPA_VALUE, SORT_ORDER FROM report_card_grades ORDER BY GRADE_SCALE_ID, SORT_ORDER");
 while ($row = $r->fetch_assoc()) echo "  Row ID={$row['ID']} scale={$row['GRADE_SCALE_ID']} title={$row['TITLE']} gpa={$row['GPA_VALUE']} sort={$row['SORT_ORDER']}\n";
 
+echo "\n--- course_periods with grade_scale_id set ---\n";
+$r = $m->query("SELECT COUNT(*) AS c FROM course_periods WHERE grade_scale_id IS NOT NULL AND grade_scale_id != 0");
+echo "  " . $r->fetch_assoc()['c'] . " course periods reference a grade scale\n";
+
+// Fix: delete ALL existing grade scales and rows so user can start fresh
+if (isset($_GET['fix_gradescales'])) {
+    $m->query("DELETE FROM report_card_grades");
+    $m->query("DELETE FROM report_card_grade_scales");
+    $m->query("ALTER TABLE report_card_grade_scales AUTO_INCREMENT=1");
+    echo "\nGrade scales cleared. Refresh to confirm.\n";
+}
+
 $m->close();
 echo "\n</pre>\n";
