@@ -139,27 +139,32 @@ if (isset($_GET['fix_gradescales'])) {
 
 // Add academic year 2025-2026 (syear=2025, 2025-08-01 to 2026-07-31)
 if (isset($_GET['add_year_2025'])) {
-    // school_years row
-    $ok = $m->query("INSERT INTO school_years (SYEAR, SCHOOL_ID, TITLE, START_DATE, END_DATE)
-                     VALUES (2025, 1, '2025-2026', '2025-08-01', '2026-07-31')
-                     ON DUPLICATE KEY UPDATE START_DATE='2025-08-01', END_DATE='2026-07-31', TITLE='2025-2026'");
-    echo "\nschool_years 2025-2026: " . ($ok ? "OK" : "FAILED: " . $m->error) . "\n";
+    // 1. Create full-year marking period first (school_years needs its ID)
+    $mp_check = $m->query("SELECT MARKING_PERIOD_ID FROM marking_periods WHERE SYEAR=2025 AND SCHOOL_ID=1 AND MP='FY' LIMIT 1");
+    $mp_row = $mp_check->fetch_assoc();
+    if ($mp_row) {
+        $mp_id = $mp_row['MARKING_PERIOD_ID'];
+        echo "\nmarking_periods FY 2025-2026: already exists (ID=$mp_id)\n";
+    } else {
+        $next_id_row = $m->query("SELECT COALESCE(MAX(MARKING_PERIOD_ID), 0) + 1 AS next_id FROM marking_periods")->fetch_assoc();
+        $next_mp_id = (int)$next_id_row['next_id'];
+        $m->query("INSERT INTO marking_periods (MARKING_PERIOD_ID, SYEAR, SCHOOL_ID, MP, TITLE, SHORT_NAME, START_DATE, END_DATE, PARENT_ID, SORT_ORDER)
+                   VALUES ($next_mp_id, 2025, 1, 'FY', 'Full Year 2025-2026', 'FY', '2025-08-01', '2026-07-31', NULL, 1)");
+        $mp_id = $m->insert_id ?: $next_mp_id;
+        echo "\nmarking_periods FY 2025-2026: " . ($m->error ? "FAILED: {$m->error}" : "OK (ID=$mp_id)") . "\n";
+    }
 
-    // staff_school_relationship for admin
+    // 2. school_years row (references marking_period_id)
+    $ok = $m->query("INSERT INTO school_years (SYEAR, SCHOOL_ID, TITLE, START_DATE, END_DATE, MARKING_PERIOD_ID)
+                     VALUES (2025, 1, '2025-2026', '2025-08-01', '2026-07-31', $mp_id)
+                     ON DUPLICATE KEY UPDATE START_DATE='2025-08-01', END_DATE='2026-07-31', TITLE='2025-2026', MARKING_PERIOD_ID=$mp_id");
+    echo "school_years 2025-2026: " . ($ok ? "OK" : "FAILED: " . $m->error) . "\n";
+
+    // 3. staff_school_relationship for admin
     $ok2 = $m->query("INSERT INTO staff_school_relationship (STAFF_ID, SYEAR, SCHOOL_ID, START_DATE)
                       VALUES (1, 2025, 1, '2025-08-01')
                       ON DUPLICATE KEY UPDATE START_DATE='2025-08-01'");
     echo "staff_school_relationship 2025: " . ($ok2 ? "OK" : "FAILED: " . $m->error) . "\n";
-
-    // Copy marking_periods from syear=2026 if they exist, else create a full-year period
-    $mp = $m->query("SELECT COUNT(*) AS c FROM marking_periods WHERE SYEAR=2025 AND SCHOOL_ID=1");
-    if ((int)$mp->fetch_assoc()['c'] === 0) {
-        $m->query("INSERT INTO marking_periods (SYEAR, SCHOOL_ID, MP, TITLE, SHORT_NAME, START_DATE, END_DATE, PARENT_ID, SORT_ORDER)
-                   VALUES (2025, 1, 'FY', 'Full Year 2025-2026', 'FY', '2025-08-01', '2026-07-31', NULL, 1)");
-        echo "marking_periods FY 2025-2026: OK\n";
-    } else {
-        echo "marking_periods 2025: already exist\n";
-    }
 
     echo "\nYear 2025-2026 created. Log out and back in, then select '2025-2026' from the year dropdown.\n";
 }
