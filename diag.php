@@ -115,5 +115,14 @@ echo "staff_school_rel start_date fix: {$m->affected_rows} rows\n";
 $active = $m->query("SELECT MAX(SYEAR) AS SYEAR FROM school_years WHERE CURDATE() BETWEEN start_date AND end_date AND school_id=1")->fetch_assoc();
 echo "Active syear (CURDATE between start/end): " . ($active['SYEAR'] ?? '(none - login will have no school)') . "\n";
 
+// Show grade scale tables
+echo "\n--- report_card_grade_scales ---\n";
+$r = $m->query("SELECT ID, TITLE, GP_SCALE, SORT_ORDER FROM report_card_grade_scales ORDER BY ID");
+while ($row = $r->fetch_assoc()) echo "  Scale ID={$row['ID']} title={$row['TITLE']} gp={$row['GP_SCALE']} sort={$row['SORT_ORDER']}\n";
+
+echo "\n--- report_card_grades (rows within scales) ---\n";
+$r = $m->query("SELECT ID, GRADE_SCALE_ID, TITLE, GPA_VALUE, SORT_ORDER FROM report_card_grades ORDER BY GRADE_SCALE_ID, SORT_ORDER");
+while ($row = $r->fetch_assoc()) echo "  Row ID={$row['ID']} scale={$row['GRADE_SCALE_ID']} title={$row['TITLE']} gpa={$row['GPA_VALUE']} sort={$row['SORT_ORDER']}\n";
+
 $m->close();
 echo "\n</pre>\n";
