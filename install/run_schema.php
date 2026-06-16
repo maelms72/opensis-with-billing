@@ -84,7 +84,7 @@ if ($app_rows === 0) {
     // have exactly one row — openSIS reads it on every page for maintenance
     // mode, failed-login limits, and activity-day checks.
     // Seed billing module permissions for admin (profile_id=1)
-    foreach (['billing/Dashboard.php','billing/FeeTypes.php','billing/Invoices.php','billing/Payments.php','billing/Settings.php'] as $bmod) {
+    foreach (['billing/pages/Dashboard.php','billing/pages/FeeTypes.php','billing/pages/Invoices.php','billing/pages/Settings.php'] as $bmod) {
         $m->query("INSERT IGNORE INTO `profile_exceptions` (`profile_id`,`modname`,`can_use`,`can_edit`) VALUES (1,'$bmod','Y','Y')");
     }
     $m->query("INSERT IGNORE INTO `system_preference_misc`

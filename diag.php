@@ -78,7 +78,9 @@ if ((int)$pe_count < 10) {
 }
 
 // Seed billing module entries in profile_exceptions (admin profile_id=1)
-$billing_mods = ['billing/Dashboard.php','billing/FeeTypes.php','billing/Invoices.php','billing/Payments.php','billing/Settings.php'];
+// Delete old wrong-path entries, insert correct ones
+$m->query("DELETE FROM profile_exceptions WHERE profile_id=1 AND modname LIKE 'billing/%' AND modname NOT LIKE 'billing/pages/%'");
+$billing_mods = ['billing/pages/Dashboard.php','billing/pages/FeeTypes.php','billing/pages/Invoices.php','billing/pages/Settings.php'];
 foreach ($billing_mods as $bmod) {
     $m->query("INSERT IGNORE INTO profile_exceptions (profile_id, modname, can_use, can_edit) VALUES (1,'$bmod','Y','Y')");
 }
