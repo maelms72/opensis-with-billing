@@ -23,9 +23,14 @@ function makeObject() {
 var request = makeObject();
 
 var the_content;
-function check_content(the_content) {
+function loadContent(url, postData) {
     $('#loading-image').show();
-    $.ajax(the_content).done(function (data) {
+    var ajaxOpts = { url: url };
+    if (postData !== undefined) {
+        ajaxOpts.type = 'POST';
+        ajaxOpts.data = postData;
+    }
+    $.ajax(ajaxOpts).done(function(data) {
         var headHtml = '';
         var headMatch = data.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
         if (headMatch) {
@@ -33,43 +38,26 @@ function check_content(the_content) {
         }
         var bodyHtml = data.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
         var el = document.getElementById('content');
-        if (el) {
-            el.innerHTML = headHtml + bodyHtml;
-        }
+        if (el) { el.innerHTML = headHtml + bodyHtml; }
         $('#loading-image').hide();
-        // Intercept form submits inside #content so POST actions (e.g. delete
-        // confirmations) stay within the Ajax flow instead of navigating the page.
-        $('#content form').off('submit.ajax').on('submit.ajax', function(e) {
-            var form = $(this);
-            var action = form.attr('action') || '';
-            // Convert Modules.php action to Ajax.php so the response renders in #content
-            var ajaxAction = action.replace('Modules.php', 'Ajax.php');
-            if (ajaxAction === action) { return true; } // not a Modules.php form — let it submit normally
-            e.preventDefault();
-            $('#loading-image').show();
-            $.ajax({
-                url: ajaxAction,
-                type: form.attr('method') || 'GET',
-                data: form.serialize()
-            }).done(function(resp) {
-                var rHead = '';
-                var rHeadMatch = resp.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-                if (rHeadMatch) {
-                    rHead = rHeadMatch[1].replace(/<(?!script|link|\/script|\/link)[^>]+>/gi, '');
-                }
-                var rBody = resp.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
-                var el2 = document.getElementById('content');
-                if (el2) { el2.innerHTML = rHead + rBody; }
-                $('#loading-image').hide();
-                // Re-bind form intercept for any new forms rendered (e.g. after delete, list reloads)
-                $('#content form').off('submit.ajax').on('submit.ajax', arguments.callee);
-            }).fail(function() {
-                $('#loading-image').hide();
-            });
-        });
     }).fail(function() {
         $('#loading-image').hide();
     });
+}
+
+// Delegated submit handler: intercepts any form inside #content that posts to Modules.php,
+// converts the action to Ajax.php, and keeps the response inside #content.
+$(document).off('submit.contentform').on('submit.contentform', '#content form', function(e) {
+    var form = $(this);
+    var action = (form.attr('action') || '').replace(/&amp;/g, '&');
+    if (action.indexOf('Modules.php') === -1) { return true; }
+    e.preventDefault();
+    var ajaxAction = action.replace('Modules.php', 'Ajax.php');
+    loadContent(ajaxAction, form.serialize());
+});
+
+function check_content(the_content) {
+    loadContent(the_content);
 }
 function parseCheck_content() {
     if (request.readyState == 1) {
