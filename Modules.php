@@ -759,7 +759,6 @@ foreach ($_openSIS['Menu'] as $modcat => $programs) {
 /*
  * Primary Navigation End
  */
-$get_app_details = DBGet(DBQuery('SELECT * FROM app'));
 echo '</ul>
                                 </div>
                             </div>
@@ -1084,7 +1083,7 @@ echo '</div>
                     </div>
                     <div class="col-md-3">
                         <div class="version-info">
-                            Version <b>' . $get_app_details[1]['VALUE'] . '</b>
+                            Version <b>' . (($get_app_details = DBGet(DBQuery('SELECT * FROM app'))) ? $get_app_details[1]['VALUE'] : '') . '</b>
                         </div>
                     </div>
                 </div>
