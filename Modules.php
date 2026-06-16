@@ -759,7 +759,7 @@ foreach ($_openSIS['Menu'] as $modcat => $programs) {
 }
 
 /*
- * Primary Navigation End
+ * Primary Navigation End - v2
  */
 echo '</ul>
                                 </div>
