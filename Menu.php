@@ -25,30 +25,22 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #***************************************************************************************
-echo '<!-- DBG:M1-session-check -->';
 if (!$_SESSION['STAFF_ID'] && !$_SESSION['STUDENT_ID'] && (strpos($_SERVER['PHP_SELF'], 'index.php')) === false) {
 	header('Location: index.php');
 	exit();
 }
-echo '<!-- DBG:M2-past-session-check -->';
 if (!$_openSIS['Menu']) {
-	echo '<!-- DBG:M3-entering-menu-build -->';
 	foreach ($openSISModules as $module => $include)
 		if ($include) {
-			echo "<!-- DBG:M4-before-$module -->";
 			include "modules/$module/Menu.php";
-			echo "<!-- DBG:M5-after-$module -->";
 		}
 
-	echo '<!-- DBG:M6-past-module-includes -->';
 	$profile = User('PROFILE');
-	echo "<!-- DBG:M7-profile=$profile -->";
 
 	if ($profile != 'student')
 		if (User('PROFILE_ID') != '') {
-			echo '<!-- DBG:M8-querying-profile-exceptions -->';
+
 			$can_use_RET = DBGet(DBQuery("SELECT MODNAME FROM profile_exceptions WHERE PROFILE_ID='" . User('PROFILE_ID') . "' AND CAN_USE='Y'"), array(), array('MODNAME'));
-			echo '<!-- DBG:M9-can_use count=' . count($can_use_RET) . ' -->';
 		} else {
 			$profile_id_mod = DBGet(DBQuery("SELECT PROFILE_ID FROM staff WHERE USER_ID='" . User('STAFF_ID')));
 			$profile_id_mod = $profile_id_mod[1]['PROFILE_ID'];
@@ -60,7 +52,6 @@ if (!$_openSIS['Menu']) {
 		$profile = 'parent';
 	}
 
-	echo '<!-- DBG:M10-building-openSIS-menu -->';
 	foreach ($menu as $modcat => $profiles) {
 		$menuprof = $menu;
 		$programs = $profiles[$profile];
@@ -77,4 +68,3 @@ if (!$_openSIS['Menu']) {
 	if (User('PROFILE') == 'student')
 		unset($_openSIS['Menu']['users']);
 }
-echo '<!-- DBG:M11-menu-done -->';

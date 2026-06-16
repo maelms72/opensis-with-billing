@@ -83,6 +83,10 @@ if ($app_rows === 0) {
     // system_preference_misc is never seeded by any installer file but must
     // have exactly one row — openSIS reads it on every page for maintenance
     // mode, failed-login limits, and activity-day checks.
+    // Seed billing module permissions for admin (profile_id=1)
+    foreach (['billing/Dashboard.php','billing/FeeTypes.php','billing/Invoices.php','billing/Payments.php','billing/Settings.php'] as $bmod) {
+        $m->query("INSERT IGNORE INTO `profile_exceptions` (`profile_id`,`modname`,`can_use`,`can_edit`) VALUES (1,'$bmod','Y','Y')");
+    }
     $m->query("INSERT IGNORE INTO `system_preference_misc`
         (fail_count, activity_days, system_maintenance_switch) VALUES (3, 30, NULL)");
     echo "  ✓ Initial data seeded\n";

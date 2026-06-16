@@ -77,6 +77,14 @@ if ((int)$pe_count < 10) {
     }
 }
 
+// Seed billing module entries in profile_exceptions (admin profile_id=1)
+$billing_mods = ['billing/Dashboard.php','billing/FeeTypes.php','billing/Invoices.php','billing/Payments.php','billing/Settings.php'];
+foreach ($billing_mods as $bmod) {
+    $m->query("INSERT IGNORE INTO profile_exceptions (profile_id, modname, can_use, can_edit) VALUES (1,'$bmod','Y','Y')");
+}
+$bc = $m->query("SELECT COUNT(*) AS c FROM profile_exceptions WHERE profile_id=1 AND modname LIKE 'billing/%'")->fetch_assoc()['c'];
+echo "\nbilling profile_exceptions (profile_id=1): $bc rows\n";
+
 // Fix school_years and staff_school_relationship start dates so today falls within the active year
 $m->query("UPDATE school_years SET start_date='2026-01-01' WHERE school_id=1 AND syear=2026");
 echo "\nschool_years start_date fix: {$m->affected_rows} rows\n";

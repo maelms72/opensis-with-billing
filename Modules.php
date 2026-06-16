@@ -597,7 +597,6 @@ echo '<li><a href="index.php?modfunc=logout"><i class="icon-switch2"></i> <span>
  * Primary Navigation Start
  */
 require('Menu.php');
-echo '<!-- DEBUG menu_keys=' . implode(',', array_keys($_openSIS['Menu'])) . ' profile=' . User('PROFILE') . ' profile_id=' . User('PROFILE_ID') . ' -->';
 
 $current_mod = substr($_REQUEST['modname'], 0, strrpos($_REQUEST['modname'], '/'));
 $current_user_profile = strtolower(User('PROFILE'));
