@@ -24,7 +24,7 @@ var request = makeObject();
 
 var the_content;
 function check_content(the_content) {
-    console.log('check_content called:', the_content);
+    console.log('check_content called:', the_content, '| doc:', document.location.href, '| #content in doc:', !!document.getElementById('content'), '| IDs:', Array.from(document.querySelectorAll('[id]')).map(function(e){return e.id}).slice(0,20).join(','));
     $('#loading-image').show();
     $.ajax(the_content).done(function (data) {
         console.log('Ajax done, len:', data.length);
