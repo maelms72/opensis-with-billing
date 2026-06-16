@@ -1,4 +1,13 @@
 <?php
+if (isset($_GET['download_template'])) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="student_import_template.csv"');
+    echo "first_name,last_name,middle_name,gender,birthdate,grade,email,phone,alt_id,name_suffix,username,password\n";
+    echo "Jane,Smith,,F,2015-09-01,Y1,jane.smith@example.com,,,,,\n";
+    echo "Tom,Jones,,M,2014-03-15,Y2,,,TOM001,,,\n";
+    exit;
+}
+
 include '../../RedirectModulesInc.php';
 include_once '../../functions/PasswordHashFnc.php';
 
@@ -201,7 +210,7 @@ if ($results) {
       <button type="submit" class="btn btn-primary">
         <i class="icon-upload"></i> Upload &amp; Import
       </button>
-      <a href="student_import_template.csv" class="btn btn-default" download>
+      <a href="Ajax.php?modname=tools/StudentCsvImport.php&download_template=1" class="btn btn-default">
         <i class="icon-download"></i> Download Template
       </a>
     </form>
