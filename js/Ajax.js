@@ -54,10 +54,13 @@ function check_content(the_content) {
         $(document).on('submit.contentform', '#content form', function(e) {
             var form = $(this);
             var action = (form.attr('action') || '').replace(/&amp;/g, '&');
-            if (action.indexOf('Modules.php') === -1) { return true; }
+            console.log('FORM SUBMIT intercepted, action:', action, 'method:', form.attr('method'));
+            if (action.indexOf('Modules.php') === -1) { console.log('not Modules.php, letting through'); return true; }
             e.preventDefault();
+            console.log('prevented default, posting to Ajax.php');
             loadContent(action.replace('Modules.php', 'Ajax.php'), form.serialize());
         });
+        console.log('contentform handler bound');
     }
     loadContent(the_content);
 }
