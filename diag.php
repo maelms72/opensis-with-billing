@@ -136,5 +136,37 @@ if (isset($_GET['fix_gradescales'])) {
     echo "\nGrade scales cleared. Refresh to confirm.\n";
 }
 
+// Check portal_notes table and program_config UPDATENOTIFY
+echo "\n--- portal_notes ---\n";
+$r = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema='$name' AND table_name='portal_notes'");
+$exists = (int)$r->fetch_assoc()['c'];
+echo "  portal_notes table: " . ($exists ? "EXISTS" : "MISSING") . "\n";
+if ($exists) {
+    $r2 = $m->query("SELECT COUNT(*) AS c FROM portal_notes");
+    echo "  portal_notes rows: " . $r2->fetch_assoc()['c'] . "\n";
+}
+
+echo "\n--- program_config UPDATENOTIFY ---\n";
+$r = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema='$name' AND table_name='program_config'");
+$pc_exists = (int)$r->fetch_assoc()['c'];
+echo "  program_config table: " . ($pc_exists ? "EXISTS" : "MISSING") . "\n";
+if ($pc_exists) {
+    $r2 = $m->query("SELECT VALUE FROM program_config WHERE program='UPDATENOTIFY' AND title='display_school' AND school_id=1");
+    $row = $r2 ? $r2->fetch_assoc() : null;
+    echo "  UPDATENOTIFY.display_school: " . ($row ? $row['VALUE'] : "(not set)") . "\n";
+}
+
+// Enable the home setup checklist
+if (isset($_GET['enable_home'])) {
+    if ($pc_exists) {
+        $m->query("INSERT INTO program_config (syear, school_id, program, title, value)
+                   VALUES (2026, 1, 'UPDATENOTIFY', 'display_school', 'Y')
+                   ON DUPLICATE KEY UPDATE value='Y'");
+        echo "\nUPDATENOTIFY.display_school set to Y. Home page setup checklist enabled.\n";
+    } else {
+        echo "\nprogram_config table missing — cannot enable.\n";
+    }
+}
+
 $m->close();
 echo "\n</pre>\n";
