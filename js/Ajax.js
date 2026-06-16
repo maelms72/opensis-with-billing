@@ -26,7 +26,8 @@ var the_content;
 function check_content(the_content) {
     var allIds = Array.from(document.querySelectorAll('[id]')).map(function(e){return e.id});
     console.log('check_content called:', the_content, '| total IDs:', allIds.length, '| has content:', allIds.indexOf('content'), '| last 10 IDs:', allIds.slice(-10).join(','));
-    console.log('getElementById content:', document.getElementById('content'), '| querySelector:', document.querySelector('#content'), '| body children:', document.body ? document.body.children.length : 'no body');
+    var bodyHTML = document.body ? document.body.innerHTML : 'NO BODY';
+    console.log('body innerHTML length:', bodyHTML.length, '| last 300:', bodyHTML.slice(-300));
     $('#loading-image').show();
     $.ajax(the_content).done(function (data) {
         console.log('Ajax done, len:', data.length);
