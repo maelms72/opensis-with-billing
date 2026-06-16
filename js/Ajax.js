@@ -24,20 +24,19 @@ var request = makeObject();
 
 var the_content;
 function check_content(the_content) {
+    console.log('check_content called:', the_content);
     $('#loading-image').show();
     $.ajax(the_content).done(function (data) {
-        // Ajax.php wraps every response in a full HTML document via Warehouse('header'/'footer').
-        // Injecting a complete <html><head>...</head>...<body>...</body></html> into a <div>
-        // via jQuery .html() causes the browser's fragment parser to discard/misplace content.
-        // Fix: extract <head> scripts/links (module-specific assets) + body content separately.
+        console.log('Ajax done, len:', data.length);
         var headHtml = '';
         var headMatch = data.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
         if (headMatch) {
-            // Keep only <script> and <link> tags from the head (not meta/title etc.)
             headHtml = headMatch[1].replace(/<(?!script|link|\/script|\/link)[^>]+>/gi, '');
         }
         var bodyHtml = data.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
+        console.log('bodyHtml first 200:', bodyHtml.substring(0, 200));
         $('#content').html(headHtml + bodyHtml);
+        console.log('#content html length after set:', $('#content').html().length);
         $('#loading-image').hide();
     }).fail(function(jqXHR, textStatus, errorThrown) {
         console.log('AJAX FAILED:', textStatus, errorThrown, 'status:', jqXHR.status);
