@@ -4,9 +4,14 @@
  */
 
 include '../../RedirectModulesInc.php';
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+echo '<!-- BILLING_SETTINGS_START -->';
 include_once '../BillingFunctions.php';
+echo '<!-- AFTER_BILLING_FUNCTIONS -->';
 
 DrawBC(_('Billing') . ' > ' . _('Settings'));
+echo '<!-- AFTER_DRAWBC -->';
 
 $school_id = (int)UserSchool();
 $msg = '';
