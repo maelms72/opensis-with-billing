@@ -566,3 +566,221 @@ ul[id*="select2-period-"] {
     .text-lg-center { text-align: center; }
     .text-lg-justify { text-align: justify; }
 }
+
+/* ============================================================
+   UI ENHANCEMENTS — professional theme
+   ============================================================ */
+
+/* ── Variables (simulated via repeated values) ──────────────
+   Primary:  #2563a8  (deep school blue)
+   Sidebar:  #1e2d45  (dark navy)
+   Accent:   #3a8fdd  (lighter hover blue)
+   ────────────────────────────────────────────────────────── */
+
+/* ── Navbar ──────────────────────────────────────────────── */
+.navbar.navbar-inverse.bg-white {
+    background: #fff !important;
+    border-bottom: 1px solid #dde3ea !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08) !important;
+    min-height: 52px;
+}
+.navbar-brand > img {
+    height: 36px !important;
+    margin-top: -1px;
+}
+.sidebar-control {
+    background: transparent !important;
+    border: none !important;
+    color: #2563a8 !important;
+    font-size: 18px;
+    margin: 8px 0 8px 12px !important;
+}
+.sidebar-control:hover { color: #1a4a80 !important; }
+
+/* User account dropdown in navbar */
+.navbar-user-menu .dropdown-toggle {
+    color: #444 !important;
+    padding: 14px 15px;
+    font-size: 13px;
+    font-weight: 500;
+}
+.navbar-user-menu .dropdown-toggle:hover { color: #2563a8 !important; }
+.navbar-user-menu .dropdown-toggle .user-avatar {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #2563a8;
+    color: #fff;
+    text-align: center;
+    line-height: 28px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.navbar-user-menu .dropdown-menu {
+    right: 0;
+    left: auto;
+    min-width: 180px;
+    border-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    border: 1px solid #e8ecf0;
+    padding: 6px 0;
+    margin-top: 2px;
+}
+.navbar-user-menu .dropdown-menu > li > a {
+    padding: 9px 18px;
+    font-size: 13px;
+    color: #444;
+}
+.navbar-user-menu .dropdown-menu > li > a:hover {
+    background: #f0f5ff;
+    color: #2563a8;
+}
+.navbar-user-menu .dropdown-menu > .divider { margin: 4px 0; }
+.navbar-user-menu .dropdown-menu .user-header {
+    padding: 12px 18px 10px;
+    border-bottom: 1px solid #eef0f3;
+    margin-bottom: 4px;
+}
+.navbar-user-menu .dropdown-menu .user-header strong {
+    display: block;
+    font-size: 13px;
+    color: #222;
+}
+.navbar-user-menu .dropdown-menu .user-header span {
+    font-size: 11px;
+    color: #888;
+    text-transform: capitalize;
+}
+.navbar-user-menu .dropdown-menu > li.logout-item > a {
+    color: #c0392b;
+}
+.navbar-user-menu .dropdown-menu > li.logout-item > a:hover {
+    background: #fff5f5;
+    color: #c0392b;
+}
+
+/* ── Sidebar dark theme ──────────────────────────────────── */
+.sidebar-main { background: #1e2d45 !important; }
+
+.sidebar-main .sidebar-content { background: #1e2d45; }
+
+.sidebar-main .sidebar-user-material { background: #162438; }
+.sidebar-main .sidebar-user-material-content h6 { color: #fff; font-weight: 500; }
+.sidebar-main .sidebar-user-material-content span { color: rgba(255,255,255,0.55); font-size: 11px; }
+.sidebar-main .sidebar-user-material-menu > a { color: rgba(255,255,255,0.7) !important; font-size: 12px; }
+.sidebar-main .sidebar-user-material-menu > a:hover { color: #fff !important; }
+
+.sidebar-main .img-circle { border: 2px solid rgba(255,255,255,0.2); }
+
+.sidebar-main .navigation-wrapper { background: #162438; }
+.sidebar-main .navigation-wrapper .navigation > li > a {
+    color: rgba(255,255,255,0.75);
+    font-size: 12px;
+    padding: 9px 20px;
+}
+.sidebar-main .navigation-wrapper .navigation > li > a:hover { color: #fff; }
+
+/* Main nav items */
+.sidebar-main .navigation-main > li > a {
+    color: rgba(255,255,255,0.8) !important;
+    font-size: 13px;
+    padding: 11px 20px !important;
+    border-radius: 0 !important;
+    transition: background 0.15s, color 0.15s;
+}
+.sidebar-main .navigation-main > li > a > i {
+    color: rgba(255,255,255,0.55) !important;
+    margin-right: 10px;
+    font-size: 15px;
+    min-width: 18px;
+}
+.sidebar-main .navigation-main > li > a:hover,
+.sidebar-main .navigation-main > li > a:focus {
+    background: rgba(255,255,255,0.08) !important;
+    color: #fff !important;
+}
+.sidebar-main .navigation-main > li > a:hover > i,
+.sidebar-main .navigation-main > li > a:focus > i { color: #fff !important; }
+
+.sidebar-main .navigation-main > li.active > a {
+    background: #2563a8 !important;
+    color: #fff !important;
+}
+.sidebar-main .navigation-main > li.active > a > i { color: #fff !important; }
+
+/* Sub-navigation (accordion children) */
+.sidebar-main .navigation-main .navigation-header span {
+    color: rgba(255,255,255,0.35) !important;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.sidebar-main .navigation-main ul li > a {
+    color: rgba(255,255,255,0.7) !important;
+    font-size: 12px;
+    padding: 8px 20px 8px 48px !important;
+    background: transparent !important;
+}
+.sidebar-main .navigation-main ul li > a:hover { color: #fff !important; }
+.sidebar-main .navigation-main ul li.active > a { color: #fff !important; font-weight: 500; }
+
+/* Version info at bottom */
+.sidebar-main .version-info { color: rgba(255,255,255,0.3); }
+
+/* ── Breadcrumb bar ──────────────────────────────────────── */
+.breadcrumb-line:not([class*="bg-"]) {
+    background: linear-gradient(to right, #2563a8, #3178c6) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12) !important;
+}
+.breadcrumb-line .breadcrumb > li { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 500; }
+.breadcrumb-line .breadcrumb > li + li::before { color: rgba(255,255,255,0.5); }
+
+/* ── Panels / Cards ──────────────────────────────────────── */
+.panel { border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e5eaf0; }
+.panel-white { border-top: 3px solid #2563a8; }
+.panel-heading { border-bottom: 1px solid #eef0f3; }
+.panel-heading .panel-title { font-size: 14px; font-weight: 600; color: #2c3e50; }
+
+/* ── Tables ──────────────────────────────────────────────── */
+.table > thead > tr > th {
+    background: #f4f7fb;
+    color: #2c3e50;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid #dde3ea;
+}
+.table-striped > tbody > tr:nth-of-type(odd) { background: #fafbfd; }
+.table-hover > tbody > tr:hover { background: #eef4ff; }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-primary {
+    background: #2563a8;
+    border-color: #1f529a;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background: #1f529a;
+    border-color: #1a4480;
+}
+.btn-info {
+    background: #3178c6;
+    border-color: #2a6ab5;
+}
+.btn-info:hover { background: #2a6ab5; }
+
+/* ── Loading indicator ───────────────────────────────────── */
+#loading-image { background: #2563a8 !important; }
+
+/* ── Active nav pill ─────────────────────────────────────── */
+.nav-pills.nav-pills-primary li.active a { background: #2563a8 !important; }
+
+/* ── Login page panel heading ────────────────────────────── */
+.panel .panel-heading { background: #1e2d45 !important; border-radius: 4px 4px 0 0; }
+.panel .panel-heading .logo { padding: 18px 0 12px; }
+.panel .panel-heading h3 { background: #2563a8 !important; color: #fff !important; font-size: 13px; letter-spacing: 0.03em; }
+.btn.btn-success { background: #2563a8 !important; border-color: #1f529a !important; }
+.btn.btn-success:hover { background: #1f529a !important; }

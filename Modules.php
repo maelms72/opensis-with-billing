@@ -422,17 +422,27 @@ echo '</ul>
                 </ul>';
 
 
-echo '<div class="navbar-text pull-right">';
-if (User('PROFILE') == 'teacher') {
-    echo '<a href="https://support.os4ed.com/hc/en-us" class="text-white" target="_blank" data-popup="tooltip" data-placement="left" data-container="body" data-original-title="Support"><i class="fa fa-life-ring fa-lg"></i></a>';
-} elseif (User('PROFILE') == 'student') {
-    echo '<a href="https://support.os4ed.com/hc/en-us" class="text-white" target="_blank" data-popup="tooltip" data-placement="left" data-container="body" data-original-title="Support"><i class="fa fa-life-ring fa-lg"></i></a>';
-} elseif (User('PROFILE') == 'parent') {
-    echo '<a href="https://support.os4ed.com/hc/en-us" class="text-white" target="_blank" data-popup="tooltip" data-placement="left" data-container="body" data-original-title="Support"><i class="fa fa-life-ring fa-lg"></i></a>';
-} else {
-    echo '<a href="https://support.os4ed.com/hc/en-us" class="text-white" target="_blank" data-popup="tooltip" data-placement="left" data-container="body" data-original-title="Support"><i class="fa fa-life-ring fa-lg"></i></a>';
-}
-echo '</div>';
+$_userName = htmlspecialchars(User('FIRST_NAME') . ' ' . User('LAST_NAME'));
+$_userInitials = strtoupper(substr(User('FIRST_NAME'), 0, 1) . substr(User('LAST_NAME'), 0, 1));
+$_userProfile  = ucwords(User('PROFILE'));
+echo '<ul class="nav navbar-nav navbar-right navbar-user-menu">
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <span class="user-avatar">' . $_userInitials . '</span>
+            ' . $_userName . '
+            <i class="caret"></i>
+        </a>
+        <ul class="dropdown-menu">
+            <li class="user-header">
+                <strong>' . $_userName . '</strong>
+                <span>' . $_userProfile . '</span>
+            </li>
+            <li><a href="javascript:void(0)" onclick="check_content(\'Ajax.php?modname=users/Preferences.php\');"><i class="icon-equalizer"></i> &nbsp;Preferences</a></li>
+            <li class="divider"></li>
+            <li class="logout-item"><a href="index.php?modfunc=logout"><i class="icon-switch2"></i> &nbsp;Log Out</a></li>
+        </ul>
+    </li>
+</ul>';
 if (User('PROFILE') == 'teacher') {
     echo "<ul class=\"breadcrumb-elements\"><li><div class=\"form-group\"><FORM name=head_frm id=head_frm action=Side.php?modfunc=update&btnn=$btn&nsc=$ns&act=subject method=POST><INPUT type=hidden name=modcat value='' id=modcat_input>";
 
