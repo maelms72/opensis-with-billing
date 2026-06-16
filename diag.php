@@ -137,6 +137,37 @@ if (isset($_GET['fix_gradescales'])) {
     echo "\nGrade scales cleared. Refresh to confirm.\n";
 }
 
+// Add academic year 2025-2026 (syear=2025, 2025-08-01 to 2026-07-31)
+if (isset($_GET['add_year_2025'])) {
+    // school_years row
+    $ok = $m->query("INSERT INTO school_years (SYEAR, SCHOOL_ID, TITLE, START_DATE, END_DATE)
+                     VALUES (2025, 1, '2025-2026', '2025-08-01', '2026-07-31')
+                     ON DUPLICATE KEY UPDATE START_DATE='2025-08-01', END_DATE='2026-07-31', TITLE='2025-2026'");
+    echo "\nschool_years 2025-2026: " . ($ok ? "OK" : "FAILED: " . $m->error) . "\n";
+
+    // staff_school_relationship for admin
+    $ok2 = $m->query("INSERT INTO staff_school_relationship (STAFF_ID, SYEAR, SCHOOL_ID, START_DATE)
+                      VALUES (1, 2025, 1, '2025-08-01')
+                      ON DUPLICATE KEY UPDATE START_DATE='2025-08-01'");
+    echo "staff_school_relationship 2025: " . ($ok2 ? "OK" : "FAILED: " . $m->error) . "\n";
+
+    // Copy marking_periods from syear=2026 if they exist, else create a full-year period
+    $mp = $m->query("SELECT COUNT(*) AS c FROM marking_periods WHERE SYEAR=2025 AND SCHOOL_ID=1");
+    if ((int)$mp->fetch_assoc()['c'] === 0) {
+        $m->query("INSERT INTO marking_periods (SYEAR, SCHOOL_ID, MP, TITLE, SHORT_NAME, START_DATE, END_DATE, PARENT_ID, SORT_ORDER)
+                   VALUES (2025, 1, 'FY', 'Full Year 2025-2026', 'FY', '2025-08-01', '2026-07-31', NULL, 1)");
+        echo "marking_periods FY 2025-2026: OK\n";
+    } else {
+        echo "marking_periods 2025: already exist\n";
+    }
+
+    echo "\nYear 2025-2026 created. Log out and back in, then select '2025-2026' from the year dropdown.\n";
+}
+
+echo "\n--- school_years in DB ---\n";
+$r = $m->query("SELECT SYEAR, TITLE, START_DATE, END_DATE FROM school_years WHERE SCHOOL_ID=1 ORDER BY SYEAR");
+while ($row = $r->fetch_assoc()) echo "  syear={$row['SYEAR']} title={$row['TITLE']} {$row['START_DATE']}..{$row['END_DATE']}\n";
+
 // Check msg_inbox table (queried first in Portal.php - if missing, die() kills page)
 echo "\n--- msg_inbox ---\n";
 $r = $m->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema='$name' AND table_name='msg_inbox'");
