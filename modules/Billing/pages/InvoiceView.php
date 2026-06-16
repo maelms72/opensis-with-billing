@@ -3,8 +3,8 @@
  * openSIS Billing Module — Invoice View & Payment Recording
  */
 
-include '../../RedirectModulesInc.php';
-include_once '../BillingFunctions.php';
+include __DIR__ . '/../../RedirectModulesInc.php';
+include_once __DIR__ . '/../BillingFunctions.php';
 
 $school_id  = (int)UserSchool();
 $syear      = (int)UserSyear();

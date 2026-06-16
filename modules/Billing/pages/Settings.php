@@ -3,15 +3,10 @@
  * openSIS Billing Module — Settings
  */
 
-include '../../RedirectModulesInc.php';
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
-echo '<!-- BILLING_SETTINGS_START -->';
-include_once '../BillingFunctions.php';
-echo '<!-- AFTER_BILLING_FUNCTIONS -->';
+include __DIR__ . '/../../RedirectModulesInc.php';
+include_once __DIR__ . '/../BillingFunctions.php';
 
-DrawBC(_('Billing') . ' > ' . _('Settings'));
-echo '<!-- AFTER_DRAWBC -->';
+DrawBC('Billing > Settings');
 
 $school_id = (int)UserSchool();
 $msg = '';

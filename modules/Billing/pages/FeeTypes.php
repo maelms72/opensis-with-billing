@@ -3,8 +3,8 @@
  * openSIS Billing Module — Fee Types
  */
 
-include '../../RedirectModulesInc.php';
-include_once '../BillingFunctions.php';
+include __DIR__ . '/../../RedirectModulesInc.php';
+include_once __DIR__ . '/../BillingFunctions.php';
 
 DrawBC(_('Billing') . ' > ' . _('Fee Types'));
 

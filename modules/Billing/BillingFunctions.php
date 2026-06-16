@@ -1,4 +1,8 @@
 <?php
+if (!function_exists('_')) {
+    function _($s) { return $s; }
+}
+
 /**
  * openSIS Billing Module — Core Functions
  *
