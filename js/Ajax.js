@@ -26,7 +26,11 @@ var the_content;
 function check_content(the_content) {
     $('#loading-image').show();
     $.ajax(the_content).done(function (data) {
+        console.log('AJAX URL:', the_content, '| response length:', data.length, '| first 300:', data.substring(0, 300));
         $('#content').html(data);
+        $('#loading-image').hide();
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.log('AJAX FAILED:', textStatus, errorThrown, 'status:', jqXHR.status, 'response:', jqXHR.responseText.substring(0, 300));
         $('#loading-image').hide();
     });
 }
@@ -73,13 +77,13 @@ function load_link_group(the_content, stat) {
         if (stat == '1')
         {
 
-document.getElementById('divErr').innerHTML ="<div class='alert alert-success alert-styled-left'><button type='button' class='close' data-dismiss='alert'><span>×</span><span class='sr-only'>Close</span></button>Member added successfully.</div>";
+document.getElementById('divErr').innerHTML ="<div class='alert alert-success alert-styled-left'><button type='button' class='close' data-dismiss='alert'><span>ï¿½</span><span class='sr-only'>Close</span></button>Member added successfully.</div>";
 
         }
         else if (stat == '2')
         {
 
-            document.getElementById('divErr').innerHTML = "<div class='alert alert-danger alert-styled-left'><button type='button' class='close' data-dismiss='alert'><span>×</span><span class='sr-only'>Close</span></button>Member deleted successfully.</div>";
+            document.getElementById('divErr').innerHTML = "<div class='alert alert-danger alert-styled-left'><button type='button' class='close' data-dismiss='alert'><span>ï¿½</span><span class='sr-only'>Close</span></button>Member deleted successfully.</div>";
 
         }
 
