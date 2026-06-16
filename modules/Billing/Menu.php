@@ -2,8 +2,8 @@
 include('../../RedirectModulesInc.php');
 
 $menu['billing']['admin'] = array(
-    'billing/pages/Dashboard.php'  => 'Dashboard',
-    'billing/pages/FeeTypes.php'   => 'Fee Types',
-    'billing/pages/Invoices.php'   => 'Invoices',
-    'billing/pages/Settings.php'   => 'Settings',
+    'Billing/pages/Dashboard.php'  => 'Dashboard',
+    'Billing/pages/FeeTypes.php'   => 'Fee Types',
+    'Billing/pages/Invoices.php'   => 'Invoices',
+    'Billing/pages/Settings.php'   => 'Settings',
 );
