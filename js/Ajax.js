@@ -39,6 +39,24 @@ function loadContent(url, postData) {
         var bodyHtml = data.replace(/^[\s\S]*?<\/head>/i, '').replace(/<\/body[\s\S]*$/i, '');
         var el = document.getElementById('content');
         if (el) { el.innerHTML = headHtml + bodyHtml; }
+        // Re-initialize date pickers for Ajax-loaded content
+        if (typeof $.fn.datepicker !== 'undefined') {
+            $('#content .datepicker-group .daterange-single').datepicker({
+                selectYears: true,
+                selectMonths: true,
+                autoclose: true,
+                format: 'yyyy-mm-dd'
+            }).off('change.ajaxdate').on('change.ajaxdate', function() {
+                var calid = $(this).attr('id');
+                var parts = $(this).val().split('-');
+                $('#daySelect_' + calid).val(parts[2]);
+                $('#monthSelect_' + calid).val(parts[1]);
+                $('#yearSelect_' + calid).val(parts[0]);
+            });
+            $('#content .datepicker-group').off('click.ajaxdate').on('click.ajaxdate', function() {
+                $(this).children('.daterange-single').trigger('focus');
+            });
+        }
         $('#loading-image').hide();
     }).fail(function() {
         $('#loading-image').hide();
