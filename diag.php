@@ -84,8 +84,26 @@ $billing_mods = ['Billing/pages/Dashboard.php','Billing/pages/FeeTypes.php','Bil
 foreach ($billing_mods as $bmod) {
     $m->query("INSERT IGNORE INTO profile_exceptions (profile_id, modname, can_use, can_edit) VALUES (1,'$bmod','Y','Y')");
 }
-$bc = $m->query("SELECT COUNT(*) AS c FROM profile_exceptions WHERE profile_id=1 AND modname LIKE 'billing/%'")->fetch_assoc()['c'];
+$bc = $m->query("SELECT COUNT(*) AS c FROM profile_exceptions WHERE profile_id=1 AND modname LIKE '%illing/pages/%'")->fetch_assoc()['c'];
 echo "\nbilling profile_exceptions (profile_id=1): $bc rows\n";
+
+// Check and install billing schema tables
+$has_settings = (int)$m->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema='$name' AND table_name='billing_settings'")->fetch_assoc()['c'];
+echo "\nbilling_settings table: " . ($has_settings ? "EXISTS" : "MISSING") . "\n";
+if (!$has_settings) {
+    echo "Installing billing schema...\n";
+    $sql = file_get_contents('/var/www/html/install/billing_schema.sql');
+    $sql = preg_replace('/^\s*--[^\n]*$/m', '', $sql);
+    $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
+    foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) {
+        if ($stmt === '' || preg_match('/^SET\s+FOREIGN_KEY_CHECKS/i', $stmt)) continue;
+        $ok = $m->query($stmt);
+        if (!$ok) echo "  SQL error: " . $m->error . "\n";
+    }
+    echo "Billing schema installed.\n";
+} else {
+    echo "billing_fee_types: " . (int)$m->query("SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema='$name' AND table_name='billing_fee_types'")->fetch_assoc()['c'] . " (exists)\n";
+}
 
 // Fix school_years and staff_school_relationship start dates so today falls within the active year
 $m->query("UPDATE school_years SET start_date='2026-01-01' WHERE school_id=1 AND syear=2026");
